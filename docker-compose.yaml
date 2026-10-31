@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: motor_ia_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-motor_ia_db}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      -pgdata: /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-motor_ia_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  redis:
+    image: redis:7-alpine
+    container_name: motor_ia_redis
+    restart: always
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli, ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: motor_ia_api
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-motor_ia_db}?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - LLM_PROVIDER=${LLM_PROVIDER:-gemini}
+      - LLM_MODEL=${LLM_MODEL:-gemini-2.0-flash}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_moduler
+
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
