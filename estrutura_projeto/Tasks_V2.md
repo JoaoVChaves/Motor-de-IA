@@ -104,10 +104,10 @@ Gemini ou da fila.*
 
 ### 2.1. Módulo de Tenants (`TenantModule`)
 
--   [ ] Implementar busca de tenant por `tenant_id`.
--   [ ] Validar existência do tenant (`NotFoundException` quando não
+-   [x] Implementar busca de tenant por `tenant_id`.
+-   [x] Validar existência do tenant (`NotFoundException` quando não
     existir).
--   [ ] Garantir que consultas e alterações de domínio sempre sejam
+-   [x] Garantir que consultas e alterações de domínio sempre sejam
     escopadas pelo `tenantId`.
 
 ### 2.2. Validador de Ficha e Prevenção de Alucinações (`CrmModule`)
