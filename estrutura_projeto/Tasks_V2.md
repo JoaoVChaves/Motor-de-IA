@@ -78,22 +78,22 @@ via Docker, com schema, migrations e tenants iniciais.*
 
 ### 1.4. Seed de Dados (`prisma/seed.ts`)
 
--   [ ] Criar Tenant 1: `sol-nascente` (Sol Nascente Energia Solar; tom
+-   [x] Criar Tenant 1: `sol-nascente` (Sol Nascente Energia Solar; tom
     informal; Recife, Olinda, Jaboatão dos Guararapes e Caruaru).
--   [ ] Criar Tenant 2: `ecovolt-sul` (EcoVolt Energia; tom formal;
+-   [x] Criar Tenant 2: `ecovolt-sul` (EcoVolt Energia; tom formal;
     Curitiba, São José dos Pinhais e Londrina).
--   [ ] Popular horários livres simulados para ambos os tenants.
--   [ ] Garantir que o seed seja idempotente: executá-lo mais de uma vez
+-   [x] Popular horários livres simulados para ambos os tenants.
+-   [x] Garantir que o seed seja idempotente: executá-lo mais de uma vez
     não deve duplicar tenants, horários ou dados.
--   [ ] Testar execução com `npx prisma db seed`.
--   [ ] Confirmar que os dados dos dois tenants estão isolados.
+-   [x] Testar execução com `npx prisma db seed`.
+-   [x] Confirmar que os dados dos dois tenants estão isolados.
 
 ### Entrega da Fase 1
 
--   [ ] `docker compose up --build` inicia os serviços sem erros.
--   [ ] API conecta ao PostgreSQL e ao Redis.
--   [ ] Migrations e seed executam com sucesso.
--   [ ] Reiniciar os containers não apaga os dados persistidos.
+-   [x] `docker compose up --build` inicia os serviços sem erros.
+-   [x] API conecta ao PostgreSQL e ao Redis.
+-   [x] Migrations e seed executam com sucesso.
+-   [x] Reiniciar os containers não apaga os dados persistidos.
 
 ------------------------------------------------------------------------
 
