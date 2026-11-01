@@ -1,0 +1,257 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum EstadoConversa {
+  IA_ATIVA
+  HUMANO_PENDENTE
+  HUMANO_ATIVO
+  PROCESSANDO
+}
+
+enum AutorMensagem {
+  lead
+  humano
+  ia
+}
+
+enum StatusMensagem {
+  PENDING
+  PROCESSING
+  PROCESSED
+  IGNORED_HUMAN
+  FAILED
+}
+
+enum TipoImovel {
+  CASA
+  APARTAMENTO
+}
+
+enum PosseImovel {
+  PROPRIO
+  ALUGADO
+}
+
+enum FormaPagamento {
+  FINANCIAMENTO
+  A_VISTA
+}
+
+// ==========================================
+// TENANT
+// ==========================================
+
+model Tenant {
+  id                     String  @id @db.VarChar(100)
+  nome_empresa           String
+  tom                    String
+  pode_dizer_que_e_ia    Boolean
+  nome_assistente        String
+  horario_atendimento_ia String
+  telefone_notificacao   String
+
+  // Configurações flexíveis
+  cidades_atendidas Json
+  estagios          Json
+  regras_gerais     Json
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  conversas      Conversation[]
+  schedule_slots ScheduleSlot[]
+
+  @@map("tenants")
+}
+
+// ==========================================
+// CONVERSATION
+// ==========================================
+
+model Conversation {
+  id                   String         @id @default(uuid()) @db.Uuid
+  tenant_id            String         @db.VarChar(100)
+  telefone             String
+  estado               EstadoConversa @default(IA_ATIVA)
+  estagio_atual        String         @default("Novo")
+  tags                 Json           @default("[]")
+  motivo_transferencia String?
+
+  // Controle de concorrência otimista
+  version Int @default(1)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Restrict)
+
+  lead_sheet   LeadSheet?
+  messages     Message[]
+  turn_metrics TurnMetric[]
+  audit_logs   AuditLog[]
+
+  // Horários reservados por esta conversa
+  booked_slots ScheduleSlot[] @relation("ConversationBookedSlots")
+
+  // Permite relacionamentos compostos com tenant_id
+  @@unique([id, tenant_id])
+  // Uma conversa por telefone dentro de cada empresa
+  @@unique([tenant_id, telefone])
+  @@map("conversations")
+}
+
+// ==========================================
+// LEAD SHEET
+// ==========================================
+
+model LeadSheet {
+  id              String @id @default(uuid()) @db.Uuid
+  conversation_id String @unique @db.Uuid
+
+  nome              String?         @db.VarChar(255)
+  cidade            String?         @db.VarChar(150)
+  tipo_imovel       TipoImovel?
+  posse_imovel      PosseImovel?
+  valor_conta       Decimal?        @db.Decimal(10, 2)
+  forma_pagamento   FormaPagamento?
+  is_cliente_antigo Boolean?
+  situacao_especial String?         @db.Text
+  dados_extras      Json?
+
+  updated_at DateTime @updatedAt
+
+  conversation Conversation @relation(fields: [conversation_id], references: [id], onDelete: Restrict)
+
+  @@map("lead_sheets")
+}
+
+// ==========================================
+// MESSAGE
+// ==========================================
+
+model Message {
+  id                  String @id @default(uuid()) @db.Uuid
+  external_message_id String
+  tenant_id           String @db.VarChar(100)
+  conversation_id     String @db.Uuid
+
+  autor  AutorMensagem
+  texto  String         @db.Text
+  status StatusMensagem @default(PENDING)
+
+  simulacao Boolean @default(false)
+  turn_id   String? @db.Uuid
+
+  // Horário informado pelo provedor
+  message_timestamp DateTime
+
+  // Horário de registro no banco
+  created_at DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversation_id, tenant_id], references: [id, tenant_id], onDelete: Restrict)
+
+  // Idempotência por tenant
+  @@unique([tenant_id, external_message_id])
+  // Busca de mensagens para processamento pelo Worker
+  @@index([conversation_id, status, created_at])
+  // Busca de mensagens por turno
+  @@index([conversation_id, turn_id])
+  @@map("messages")
+}
+
+// ==========================================
+// SCHEDULE SLOT
+// ==========================================
+
+model ScheduleSlot {
+  id        String @id @default(uuid()) @db.Uuid
+  tenant_id String @db.VarChar(100)
+
+  codigo_horario String
+  descricao      String
+  disponivel     Boolean @default(true)
+
+  booked_conversation_id String?   @db.Uuid
+  booked_at              DateTime?
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Restrict)
+
+  booked_conversation Conversation? @relation("ConversationBookedSlots", fields: [booked_conversation_id, tenant_id], references: [id, tenant_id], onDelete: Restrict)
+
+  // Evita horários duplicados dentro de cada empresa
+  @@unique([tenant_id, codigo_horario])
+  // Otimiza a busca de horários disponíveis
+  @@index([tenant_id, disponivel])
+  @@map("schedule_slots")
+}
+
+// ==========================================
+// AUDIT LOG
+// ==========================================
+
+model AuditLog {
+  id              String @id @default(uuid()) @db.Uuid
+  tenant_id       String @db.VarChar(100)
+  conversation_id String @db.Uuid
+
+  turn_id String? @db.Uuid
+
+  acao       String
+  parametros Json?
+  resultado  String
+  detalhes   String? @db.Text
+
+  simulacao Boolean @default(false)
+
+  created_at DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversation_id, tenant_id], references: [id, tenant_id], onDelete: Restrict)
+
+  @@index([conversation_id, created_at])
+  @@index([conversation_id, turn_id])
+  @@map("audit_logs")
+}
+
+// ==========================================
+// TURN METRIC
+// ==========================================
+
+model TurnMetric {
+  id              String @id @default(uuid()) @db.Uuid
+  tenant_id       String @db.VarChar(100)
+  conversation_id String @db.Uuid
+
+  // Identifica o turno de execução da IA
+  turn_id String? @db.Uuid
+
+  provider String
+  model    String
+
+  prompt_tokens     Int?
+  completion_tokens Int?
+
+  estimated_cost_usd Decimal? @db.Decimal(10, 6)
+  latency_ms         Int
+
+  acoes_executadas Json?
+  simulacao        Boolean @default(false)
+
+  created_at DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversation_id, tenant_id], references: [id, tenant_id], onDelete: Restrict)
+
+  @@index([conversation_id, created_at])
+  @@index([conversation_id, turn_id])
+  @@map("turn_metrics")
+}

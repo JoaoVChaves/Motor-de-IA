@@ -1,9 +1,9 @@
+
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { HealthController } from './health.controller';
 import { ConfigModule } from '@nestjs/config';
-import * as Joi from 'joi';
+import Joi from 'joi';
+import { HealthController } from './health.controller.js';
+import { PrismaModule } from './prisma/prisma.module.js';
 
 @Module({
   imports: [
@@ -23,8 +23,8 @@ import * as Joi from 'joi';
         REDIS_PORT: Joi.number().default(6379),
       }),
     }),
+    PrismaModule,
   ],
-  controllers: [HealthController, AppController],
-  providers: [AppService]
+  controllers: [HealthController],
 })
 export class AppModule {}

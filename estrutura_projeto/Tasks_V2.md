@@ -50,31 +50,31 @@ via Docker, com schema, migrations e tenants iniciais.*
 
 ### 1.3. Modelagem Prisma ORM (`prisma/schema.prisma`)
 
--   [ ] Definir o datasource PostgreSQL e gerar o Prisma Client.
--   [ ] Criar módulo `PrismaModule` e `PrismaService` global.
--   [ ] Definir tabela `Tenant` (configurações JSON, cidades atendidas,
+-   [x] Definir o datasource PostgreSQL e gerar o Prisma Client.
+-   [x] Criar módulo `PrismaModule` e `PrismaService` global.
+-   [x] Definir tabela `Tenant` (configurações JSON, cidades atendidas,
     estágios, regras e tom).
--   [ ] Definir tabela `Conversa` (estado: `IA_ATIVA`,
+-   [x] Definir tabela `Conversa` (estado: `IA_ATIVA`,
     `HUMANO_PENDENTE`, `HUMANO_ATIVO`, `PROCESSANDO`; estágio atual e
     tags).
--   [ ] Definir tabela `Mensagem` (idempotência por
+-   [x] Definir tabela `Mensagem` (idempotência por
     `tenantId + externalMessageId`, autor `lead | humano | ia` e status
     de processamento).
--   [ ] Definir tabela `FichaLead` (nome, cidade, tipoImovel,
+-   [x] Definir tabela `FichaLead` (nome, cidade, tipoImovel,
     posseImovel, valorConta, formaPagamento e dadosExtras).
--   [ ] Definir tabela `Agendamento` (horários disponíveis/ocupados por
+-   [x] Definir tabela `Agendamento` (horários disponíveis/ocupados por
     tenant, com garantia de que um horário não possa ser reservado duas
     vezes).
--   [ ] Definir tabela `AuditoriaAcao` (tool calls, parâmetros,
+-   [x] Definir tabela `AuditoriaAcao` (tool calls, parâmetros,
     resultado e flag `simulacao`).
--   [ ] Definir tabela `MetricaTurno` (modelo, tokens de entrada/saída,
+-   [x] Definir tabela `MetricaTurno` (modelo, tokens de entrada/saída,
     custo estimado e latência).
--   [ ] Definir índices e restrições necessários, incluindo:
+-   [x] Definir índices e restrições necessários, incluindo:
     -   `UNIQUE(tenant_id, external_message_id)` para idempotência.
     -   Unicidade adequada para identificar uma conversa por tenant e
         telefone.
     -   Restrição que impeça reservar o mesmo horário mais de uma vez.
--   [ ] Rodar `npx prisma migrate dev --name init`.
+-   [x] Rodar `npx prisma migrate dev --name init`.
 
 ### 1.4. Seed de Dados (`prisma/seed.ts`)
 
