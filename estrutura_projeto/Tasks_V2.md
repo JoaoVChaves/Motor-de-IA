@@ -112,7 +112,7 @@ Gemini ou da fila.*
 
 ### 2.2. Validador de Ficha e Prevenção de Alucinações (`CrmModule`)
 
--   [ ] Implementar
+-   [x] Implementar
     `atualizarFicha(tenantId, conversaId, dadosExtraidos)`:
     -   Ignorar valores `null`, `undefined` ou strings vazias, sem
         sobrescrever dados válidos já existentes.
@@ -120,7 +120,7 @@ Gemini ou da fila.*
         `posseImovel` dentro dos valores aceitos).
     -   Validar que a conversa pertence ao tenant informado.
     -   Atualizar somente campos efetivamente fornecidos e válidos.
--   [ ] Cobrir o comportamento com testes unitários.
+-   [x] Cobrir o comportamento com testes unitários.
 
 ### 2.3. Motor de Qualificação Determinística (`QualificationService`)
 
