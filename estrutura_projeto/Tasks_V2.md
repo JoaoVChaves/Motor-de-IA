@@ -202,58 +202,58 @@ intervenção humana e agrupar rajadas na janela de oito segundos.*
 
 ### 3.1. Estados e transições da conversa
 
--   [ ] Definir transições válidas entre `IA_ATIVA`, `PROCESSANDO`,
+-   [x] Definir transições válidas entre `IA_ATIVA`, `PROCESSANDO`,
     `HUMANO_PENDENTE` e `HUMANO_ATIVO`.
--   [ ] Definir o comportamento quando uma mensagem humana chega durante
+-   [x] Definir o comportamento quando uma mensagem humana chega durante
     `PROCESSANDO`.
--   [ ] Definir como uma falha de processamento permite uma nova
+-   [x] Definir como uma falha de processamento permite uma nova
     tentativa sem deixar a conversa presa em `PROCESSANDO`.
--   [ ] Garantir que uma conversa assumida por humano não volte
+-   [x] Garantir que uma conversa assumida por humano não volte
     automaticamente para processamento da IA.
--   [ ] Utilizar atualizações condicionais/controle de versão no
+-   [x] Utilizar atualizações condicionais/controle de versão no
     PostgreSQL para evitar que um worker sobrescreva uma mudança de
     estado concorrente.
 
 ### 3.2. Endpoint de Intervenção (`POST /intervencao`)
 
--   [ ] Criar DTO com validação (`tenant_id`, `telefone`,
+-   [x] Criar DTO com validação (`tenant_id`, `telefone`,
     `acao: 'assumir' | 'religar'`).
--   [ ] Se `assumir`: atualizar conversa para `HUMANO_ATIVO` de forma
+-   [x] Se `assumir`: atualizar conversa para `HUMANO_ATIVO` de forma
     segura, inclusive se estiver `PROCESSANDO`.
--   [ ] Se `religar`: atualizar conversa para `IA_ATIVA`, respeitando as
+-   [x] Se `religar`: atualizar conversa para `IA_ATIVA`, respeitando as
     regras de transição definidas.
--   [ ] Registrar a intervenção no histórico/auditoria, conforme o
+-   [x] Registrar a intervenção no histórico/auditoria, conforme o
     modelo definido.
--   [ ] Garantir que workers em execução reconheçam a intervenção antes
+-   [x] Garantir que workers em execução reconheçam a intervenção antes
     de executar novas ferramentas ou persistir uma resposta.
 
 ### 3.3. Endpoint de Consulta de Conversa (`GET /conversas/:tenant_id/:telefone`)
 
--   [ ] Retornar estado atual, ficha do lead, tags, estágio e histórico
+-   [x] Retornar estado atual, ficha do lead, tags, estágio e histórico
     ordenado de mensagens.
--   [ ] Garantir isolamento por `tenant_id`.
--   [ ] Não expor dados de outra conversa ou tenant.
+-   [x] Garantir isolamento por `tenant_id`.
+-   [x] Não expor dados de outra conversa ou tenant.
 
 ### 3.4. Endpoint de Webhook (`POST /webhook/mensagem`)
 
--   [ ] Validar payload (`message_id`, `tenant_id`, `telefone`, `texto`,
+-   [x] Validar payload (`message_id`, `tenant_id`, `telefone`, `texto`,
     `timestamp`, `autor`, `simulacao` opcional).
--   [ ] Validar existência do tenant.
--   [ ] Localizar a conversa por `(tenant_id, telefone)` ou criá-la caso
+-   [x] Validar existência do tenant.
+-   [x] Localizar a conversa por `(tenant_id, telefone)` ou criá-la caso
     ainda não exista.
--   [ ] Garantir criação concorrente segura: duas primeiras mensagens
+-   [x] Garantir criação concorrente segura: duas primeiras mensagens
     simultâneas não podem criar conversas duplicadas.
--   [ ] **Idempotência:** persistir com restrição única
+-   [x] **Idempotência:** persistir com restrição única
     `(tenant_id, external_message_id)` e tratar conflito de unicidade.
     Se duplicada, retornar `200 OK` com `duplicada: true`, sem repetir
     efeitos.
--   [ ] Persistir a mensagem antes de responder ao webhook.
--   [ ] Se `autor == 'humano'` ou conversa em `HUMANO_ATIVO` /
+-   [x] Persistir a mensagem antes de responder ao webhook.
+-   [x] Se `autor == 'humano'` ou conversa em `HUMANO_ATIVO` /
     `HUMANO_PENDENTE`: salvar no histórico e não enfileirar
     processamento da IA.
--   [ ] Se conversa em `IA_ATIVA` e `autor == 'lead'`: encaminhar para a
+-   [x] Se conversa em `IA_ATIVA` e `autor == 'lead'`: encaminhar para a
     fila de agrupamento.
--   [ ] Retornar rapidamente após persistir e enfileirar, sem aguardar o
+-   [x] Retornar rapidamente após persistir e enfileirar, sem aguardar o
     Gemini.
 
 ### 3.5. Fila BullMQ e Janela Antirrajada de 8s (`QueueModule`)

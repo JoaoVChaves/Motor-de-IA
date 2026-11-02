@@ -7,6 +7,9 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { TenantsModule } from './tenants/tenants.module.js';
 import { ToolExecutorModule } from './tool-executor/tool-executor.module.js';
 import { LlmModule } from './llm/llm.module.js';
+import { InterventionModule } from './intervention/intervention.module.js';
+import { ConversationsModule } from './conversations/conversations.module.js';
+import { WebhookModule } from './webhook/webhook.module.js';
 
 @Module({
   imports: [
@@ -30,6 +33,9 @@ import { LlmModule } from './llm/llm.module.js';
     TenantsModule,
     ToolExecutorModule,
     LlmModule,
+    InterventionModule,
+    ConversationsModule,
+    WebhookModule,
   ],
   controllers: [HealthController],
 })
