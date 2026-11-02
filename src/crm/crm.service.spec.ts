@@ -2,6 +2,7 @@ import { BadRequestException, NotFoundException, } from '@nestjs/common';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CrmService } from './crm.service.js';
+import { QualificationService } from '../qualification/qualification.service.js';
 
 const txMock = {
   conversation: {
@@ -30,6 +31,15 @@ const txMock = {
       }) => Promise<unknown>
     >(),
   },
+
+  tenant: {
+    findUnique: jest.fn<
+      (args: {
+        where: { id: string };
+        select: { cidades_atendidas: true };
+      }) => Promise<{ cidades_atendidas: unknown } | null>
+    >(),
+  },
 };
 
 const prismaMock = {
@@ -48,8 +58,15 @@ describe('CrmService', () => {
       callback(txMock),
     );
 
+    txMock.tenant.findUnique.mockResolvedValue({
+      cidades_atendidas: ['Caruaru'],
+    });
+
     service = new CrmService(
       prismaMock as unknown as PrismaService,
+      {
+        avaliar: jest.fn().mockReturnValue('INCOMPLETO'),
+      } as unknown as QualificationService,
     );
   });
 
@@ -77,7 +94,10 @@ describe('CrmService', () => {
         },
       );
 
-      expect(resultado).toEqual(fichaAtualizada);
+      expect(resultado).toEqual({
+        ficha: fichaAtualizada,
+        qualificacao: 'INCOMPLETO',
+      });
 
       expect(txMock.conversation.findFirst).toHaveBeenCalledWith({
         where: {

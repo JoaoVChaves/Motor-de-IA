@@ -630,10 +630,12 @@ export type ConversationCreateNestedOneWithoutAudit_logsInput = {
   connect?: Prisma.ConversationWhereUniqueInput
 }
 
-export type ConversationUpdateOneRequiredWithoutAudit_logsNestedInput = {
+export type ConversationUpdateOneWithoutAudit_logsNestedInput = {
   create?: Prisma.XOR<Prisma.ConversationCreateWithoutAudit_logsInput, Prisma.ConversationUncheckedCreateWithoutAudit_logsInput>
   connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutAudit_logsInput
   upsert?: Prisma.ConversationUpsertWithoutAudit_logsInput
+  disconnect?: Prisma.ConversationWhereInput | boolean
+  delete?: Prisma.ConversationWhereInput | boolean
   connect?: Prisma.ConversationWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ConversationUpdateToOneWithWhereWithoutAudit_logsInput, Prisma.ConversationUpdateWithoutAudit_logsInput>, Prisma.ConversationUncheckedUpdateWithoutAudit_logsInput>
 }

@@ -176,7 +176,7 @@ export type AuditLogGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 export type AuditLogGroupByOutputType = {
   id: string
   tenant_id: string
-  conversation_id: string
+  conversation_id: string | null
   turn_id: string | null
   acao: string
   parametros: runtime.JsonValue | null
@@ -210,7 +210,7 @@ export type AuditLogWhereInput = {
   NOT?: Prisma.AuditLogWhereInput | Prisma.AuditLogWhereInput[]
   id?: Prisma.UuidFilter<"AuditLog"> | string
   tenant_id?: Prisma.StringFilter<"AuditLog"> | string
-  conversation_id?: Prisma.UuidFilter<"AuditLog"> | string
+  conversation_id?: Prisma.UuidNullableFilter<"AuditLog"> | string | null
   turn_id?: Prisma.UuidNullableFilter<"AuditLog"> | string | null
   acao?: Prisma.StringFilter<"AuditLog"> | string
   parametros?: Prisma.JsonNullableFilter<"AuditLog">
@@ -218,13 +218,13 @@ export type AuditLogWhereInput = {
   detalhes?: Prisma.StringNullableFilter<"AuditLog"> | string | null
   simulacao?: Prisma.BoolFilter<"AuditLog"> | boolean
   created_at?: Prisma.DateTimeFilter<"AuditLog"> | Date | string
-  conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
+  conversation?: Prisma.XOR<Prisma.ConversationNullableScalarRelationFilter, Prisma.ConversationWhereInput> | null
 }
 
 export type AuditLogOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
-  conversation_id?: Prisma.SortOrder
+  conversation_id?: Prisma.SortOrderInput | Prisma.SortOrder
   turn_id?: Prisma.SortOrderInput | Prisma.SortOrder
   acao?: Prisma.SortOrder
   parametros?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -241,7 +241,7 @@ export type AuditLogWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.AuditLogWhereInput[]
   NOT?: Prisma.AuditLogWhereInput | Prisma.AuditLogWhereInput[]
   tenant_id?: Prisma.StringFilter<"AuditLog"> | string
-  conversation_id?: Prisma.UuidFilter<"AuditLog"> | string
+  conversation_id?: Prisma.UuidNullableFilter<"AuditLog"> | string | null
   turn_id?: Prisma.UuidNullableFilter<"AuditLog"> | string | null
   acao?: Prisma.StringFilter<"AuditLog"> | string
   parametros?: Prisma.JsonNullableFilter<"AuditLog">
@@ -249,13 +249,13 @@ export type AuditLogWhereUniqueInput = Prisma.AtLeast<{
   detalhes?: Prisma.StringNullableFilter<"AuditLog"> | string | null
   simulacao?: Prisma.BoolFilter<"AuditLog"> | boolean
   created_at?: Prisma.DateTimeFilter<"AuditLog"> | Date | string
-  conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
+  conversation?: Prisma.XOR<Prisma.ConversationNullableScalarRelationFilter, Prisma.ConversationWhereInput> | null
 }, "id">
 
 export type AuditLogOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
-  conversation_id?: Prisma.SortOrder
+  conversation_id?: Prisma.SortOrderInput | Prisma.SortOrder
   turn_id?: Prisma.SortOrderInput | Prisma.SortOrder
   acao?: Prisma.SortOrder
   parametros?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -274,7 +274,7 @@ export type AuditLogScalarWhereWithAggregatesInput = {
   NOT?: Prisma.AuditLogScalarWhereWithAggregatesInput | Prisma.AuditLogScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"AuditLog"> | string
   tenant_id?: Prisma.StringWithAggregatesFilter<"AuditLog"> | string
-  conversation_id?: Prisma.UuidWithAggregatesFilter<"AuditLog"> | string
+  conversation_id?: Prisma.UuidNullableWithAggregatesFilter<"AuditLog"> | string | null
   turn_id?: Prisma.UuidNullableWithAggregatesFilter<"AuditLog"> | string | null
   acao?: Prisma.StringWithAggregatesFilter<"AuditLog"> | string
   parametros?: Prisma.JsonNullableWithAggregatesFilter<"AuditLog">
@@ -293,13 +293,13 @@ export type AuditLogCreateInput = {
   detalhes?: string | null
   simulacao?: boolean
   created_at?: Date | string
-  conversation: Prisma.ConversationCreateNestedOneWithoutAudit_logsInput
+  conversation?: Prisma.ConversationCreateNestedOneWithoutAudit_logsInput
 }
 
 export type AuditLogUncheckedCreateInput = {
   id?: string
   tenant_id: string
-  conversation_id: string
+  conversation_id?: string | null
   turn_id?: string | null
   acao: string
   parametros?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -318,13 +318,13 @@ export type AuditLogUpdateInput = {
   detalhes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   simulacao?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  conversation?: Prisma.ConversationUpdateOneRequiredWithoutAudit_logsNestedInput
+  conversation?: Prisma.ConversationUpdateOneWithoutAudit_logsNestedInput
 }
 
 export type AuditLogUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  conversation_id?: Prisma.StringFieldUpdateOperationsInput | string
+  conversation_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   turn_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acao?: Prisma.StringFieldUpdateOperationsInput | string
   parametros?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -337,7 +337,7 @@ export type AuditLogUncheckedUpdateInput = {
 export type AuditLogCreateManyInput = {
   id?: string
   tenant_id: string
-  conversation_id: string
+  conversation_id?: string | null
   turn_id?: string | null
   acao: string
   parametros?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -361,7 +361,7 @@ export type AuditLogUpdateManyMutationInput = {
 export type AuditLogUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  conversation_id?: Prisma.StringFieldUpdateOperationsInput | string
+  conversation_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   turn_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acao?: Prisma.StringFieldUpdateOperationsInput | string
   parametros?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -514,7 +514,7 @@ export type AuditLogScalarWhereInput = {
   NOT?: Prisma.AuditLogScalarWhereInput | Prisma.AuditLogScalarWhereInput[]
   id?: Prisma.UuidFilter<"AuditLog"> | string
   tenant_id?: Prisma.StringFilter<"AuditLog"> | string
-  conversation_id?: Prisma.UuidFilter<"AuditLog"> | string
+  conversation_id?: Prisma.UuidNullableFilter<"AuditLog"> | string | null
   turn_id?: Prisma.UuidNullableFilter<"AuditLog"> | string | null
   acao?: Prisma.StringFilter<"AuditLog"> | string
   parametros?: Prisma.JsonNullableFilter<"AuditLog">
@@ -581,7 +581,7 @@ export type AuditLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   detalhes?: boolean
   simulacao?: boolean
   created_at?: boolean
-  conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
+  conversation?: boolean | Prisma.AuditLog$conversationArgs<ExtArgs>
 }, ExtArgs["result"]["auditLog"]>
 
 export type AuditLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -595,7 +595,7 @@ export type AuditLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   detalhes?: boolean
   simulacao?: boolean
   created_at?: boolean
-  conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
+  conversation?: boolean | Prisma.AuditLog$conversationArgs<ExtArgs>
 }, ExtArgs["result"]["auditLog"]>
 
 export type AuditLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -609,7 +609,7 @@ export type AuditLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   detalhes?: boolean
   simulacao?: boolean
   created_at?: boolean
-  conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
+  conversation?: boolean | Prisma.AuditLog$conversationArgs<ExtArgs>
 }, ExtArgs["result"]["auditLog"]>
 
 export type AuditLogSelectScalar = {
@@ -627,24 +627,24 @@ export type AuditLogSelectScalar = {
 
 export type AuditLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "conversation_id" | "turn_id" | "acao" | "parametros" | "resultado" | "detalhes" | "simulacao" | "created_at", ExtArgs["result"]["auditLog"]>
 export type AuditLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
+  conversation?: boolean | Prisma.AuditLog$conversationArgs<ExtArgs>
 }
 export type AuditLogIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
+  conversation?: boolean | Prisma.AuditLog$conversationArgs<ExtArgs>
 }
 export type AuditLogIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
+  conversation?: boolean | Prisma.AuditLog$conversationArgs<ExtArgs>
 }
 
 export type $AuditLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AuditLog"
   objects: {
-    conversation: Prisma.$ConversationPayload<ExtArgs>
+    conversation: Prisma.$ConversationPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
-    conversation_id: string
+    conversation_id: string | null
     turn_id: string | null
     acao: string
     parametros: runtime.JsonValue | null
@@ -1046,7 +1046,7 @@ readonly fields: AuditLogFieldRefs;
  */
 export interface Prisma__AuditLogClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  conversation<T extends Prisma.ConversationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConversationDefaultArgs<ExtArgs>>): Prisma.Prisma__ConversationClient<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  conversation<T extends Prisma.AuditLog$conversationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuditLog$conversationArgs<ExtArgs>>): Prisma.Prisma__ConversationClient<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1484,6 +1484,25 @@ export type AuditLogDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many AuditLogs to delete.
    */
   limit?: number
+}
+
+/**
+ * AuditLog.conversation
+ */
+export type AuditLog$conversationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Conversation
+   */
+  select?: Prisma.ConversationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Conversation
+   */
+  omit?: Prisma.ConversationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConversationInclude<ExtArgs> | null
+  where?: Prisma.ConversationWhereInput
 }
 
 /**

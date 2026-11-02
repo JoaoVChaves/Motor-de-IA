@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException, } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { QualificationService } from '../qualification/qualification.service.js';
 
 interface DadosExtraidos {
   nome?: unknown;
@@ -13,7 +14,10 @@ interface DadosExtraidos {
 
 @Injectable()
 export class CrmService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly qualificationService: QualificationService,
+  ) {}
 
   async atualizarFicha(
     tenantId: string,
@@ -143,7 +147,7 @@ export class CrmService {
         );
       }
 
-      return tx.leadSheet.upsert({
+      const ficha = await tx.leadSheet.upsert({
         where: {
           conversation_id: conversaId,
         },
@@ -153,6 +157,29 @@ export class CrmService {
           ...dadosValidos,
         },
       });
+
+      const tenant = await tx.tenant.findUnique({
+        where: {
+          id: tenantId,
+        },
+        select: {
+          cidades_atendidas: true,
+        },
+      });
+
+      if (!tenant) {
+        throw new NotFoundException('Tenant não encontrado.');
+      }
+
+      const qualificacao = this.qualificationService.avaliar(
+        ficha,
+        tenant,
+      );
+
+      return {
+        ficha,
+        qualificacao,
+      };
     });
   }
 }

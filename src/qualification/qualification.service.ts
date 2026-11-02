@@ -54,7 +54,8 @@ export class QualificationService {
     // 1. Transferência humana tem prioridade.
     if (
       ficha.is_cliente_antigo === true ||
-      ficha.situacao_especial !== null
+      ficha.situacao_especial != null &&
+      ficha.situacao_especial.trim() !== ''
     ) {
       return 'TRANSFERIR_HUMANO';
     }
