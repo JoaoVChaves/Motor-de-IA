@@ -124,7 +124,7 @@ Gemini ou da fila.*
 
 ### 2.3. Motor de Qualificação Determinística (`QualificationService`)
 
--   [ ] Implementar serviço puro que recebe `FichaLead` + `Tenant` e
+-   [x] Implementar serviço puro que recebe `FichaLead` + `Tenant` e
     retorna um resultado explícito:
     -   **Qualificado:** `posseImovel == 'proprio'` E
         `tipoImovel == 'casa'` E `valorConta >= 250` E `cidade` dentro
@@ -136,11 +136,11 @@ Gemini ou da fila.*
         (ex.: inventário, titularidade de terceiros, cliente antigo ou
         dúvida insolúvel).
     -   **Em qualificação:** quando faltarem campos obrigatórios.
--   [ ] Definir precedência quando houver mais de uma condição
+-   [x] Definir precedência quando houver mais de uma condição
     aplicável.
--   [ ] Não classificar como desqualificado enquanto faltarem
+-   [x] Não classificar como desqualificado enquanto faltarem
     informações que impeçam uma decisão segura.
--   [ ] Criar testes unitários para cada regra, incluindo limite de R\$
+-   [x] Criar testes unitários para cada regra, incluindo limite de R\$
     250, campos ausentes e cidades de tenants diferentes.
 
 ### 2.4. Executor de Ações / Ferramentas Internas (`CrmActionsService`)
