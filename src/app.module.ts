@@ -6,6 +6,7 @@ import { HealthController } from './health.controller.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { TenantsModule } from './tenants/tenants.module.js';
 import { ToolExecutorModule } from './tool-executor/tool-executor.module.js';
+import { LlmModule } from './llm/llm.module.js';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ToolExecutorModule } from './tool-executor/tool-executor.module.js';
     PrismaModule,
     TenantsModule,
     ToolExecutorModule,
+    LlmModule,
   ],
   controllers: [HealthController],
 })

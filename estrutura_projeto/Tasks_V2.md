@@ -145,52 +145,52 @@ Gemini ou da fila.*
 
 ### 2.4. Executor de Ações / Ferramentas Internas (`CrmActionsService`)
 
--   [ ] Implementar `adicionar_tag(conversaId, tag)` + registro em
+-   [x] Implementar `adicionar_tag(conversaId, tag)` + registro em
     `AuditoriaAcao`.
--   [ ] Implementar `mover_estagio(conversaId, estagio)` validando se o
+-   [x] Implementar `mover_estagio(conversaId, estagio)` validando se o
     estágio existe no tenant + registro em `AuditoriaAcao`.
--   [ ] Implementar `consultar_agenda(tenantId)` retornando horários
+-   [x] Implementar `consultar_agenda(tenantId)` retornando horários
     livres + registro em auditoria, conforme política definida.
--   [ ] Implementar `marcar_agenda(tenantId, conversaId, horario)`:
+-   [x] Implementar `marcar_agenda(tenantId, conversaId, horario)`:
     -   Verificar e reservar o horário de forma atômica, evitando dupla
         reserva concorrente.
     -   Confirmar que a conversa pertence ao tenant.
     -   Só confirmar o agendamento após manifestação explícita de
         interesse e escolha do horário pelo cliente.
     -   Atualizar estágio para `Agendado` e registrar auditoria.
--   [ ] Implementar
+-   [x] Implementar
     `notificar_equipe(tenantId, conversaId, resumo, simulacao)`:
     -   Se `simulacao == true`, registrar apenas na auditoria, sem envio
         externo.
     -   Se não houver integração externa prevista no escopo, registrar a
         notificação como simulada/pendente, sem fingir que houve envio
         real.
--   [ ] Implementar `transferir_humano(conversaId, motivo)`:
+-   [x] Implementar `transferir_humano(conversaId, motivo)`:
     -   Alterar estado para `HUMANO_PENDENTE`.
     -   Mover estágio para `Humano`.
     -   Registrar auditoria.
--   [ ] Validar estado da conversa antes de executar ações com efeitos
+-   [x] Validar estado da conversa antes de executar ações com efeitos
     colaterais.
--   [ ] Definir quais ferramentas são chamadas pelo LLM e quais são
+-   [x] Definir quais ferramentas são chamadas pelo LLM e quais são
     executadas exclusivamente pelo backend.
 
 ### 2.5. Mock inicial do LLM (`MockLlmAdapter`)
 
--   [ ] Criar desde já a interface/contrato comum do adapter e uma
+-   [x] Criar desde já a interface/contrato comum do adapter e uma
     implementação inicial do `MockLlmAdapter`.
--   [ ] Permitir respostas determinísticas para desenvolver o fluxo sem
+-   [x] Permitir respostas determinísticas para desenvolver o fluxo sem
     depender de API externa.
--   [ ] Manter o Mock simples nesta fase; ampliar os casos cobertos na
+-   [x] Manter o Mock simples nesta fase; ampliar os casos cobertos na
     Fase 5.
 
 ### Entrega da Fase 2
 
--   [ ] Testes unitários do `QualificationService` passando.
--   [ ] Atualização de ficha preserva dados existentes quando recebe
+-   [x] Testes unitários do `QualificationService` passando.
+-   [x] Atualização de ficha preserva dados existentes quando recebe
     valores vazios.
--   [ ] Ações CRM validam tenant e registram auditoria.
--   [ ] Agendamento não permite reserva duplicada.
--   [ ] Regras de negócio podem ser demonstradas sem Gemini, PostgreSQL
+-   [x] Ações CRM validam tenant e registram auditoria.
+-   [x] Agendamento não permite reserva duplicada.
+-   [x] Regras de negócio podem ser demonstradas sem Gemini, PostgreSQL
     e Redis externos à aplicação.
 
 ------------------------------------------------------------------------
