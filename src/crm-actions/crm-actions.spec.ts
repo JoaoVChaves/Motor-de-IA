@@ -10,6 +10,9 @@ describe('CrmActionsService', () => {
   let service: CrmActionsService;
 
     const txMock = {
+
+      $queryRaw: jest.fn<(...args: any[]) => Promise<any>>(),
+
       conversation: {
         findFirst: jest.fn<(...args: any[]) => Promise<any>>(),
         update: jest.fn<(...args: any[]) => Promise<any>>(),
@@ -41,6 +44,14 @@ describe('CrmActionsService', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+
+    txMock.$queryRaw.mockResolvedValue([
+      {
+        id: 'conversa-1',
+        estado: 'PROCESSANDO',
+        version: 1,
+      },
+    ]);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -135,7 +146,7 @@ describe('CrmActionsService', () => {
       'sol-nascente',
       'conversa-1',
       'qualificado',
-    );
+      1);
 
     expect(resultado).toEqual({
       tags: ['qualificado'],
@@ -184,7 +195,7 @@ describe('CrmActionsService', () => {
       'sol-nascente',
       'conversa-1',
       'qualificado',
-      true,
+      1, true,
     );
 
     expect(resultado).toEqual({
@@ -232,7 +243,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'qualificado',
-      ),
+        1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(txMock.conversation.update).not.toHaveBeenCalled();
@@ -272,7 +283,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'qualificado',
-      ),
+        1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(qualificationServiceMock.avaliar).not.toHaveBeenCalled();
@@ -305,7 +316,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'qualificado',
-      ),
+        1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(qualificationServiceMock.avaliar).not.toHaveBeenCalled();
@@ -328,7 +339,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-inexistente',
         'qualificado',
-      ),
+        1),
     ).rejects.toThrow(NotFoundException);
 
     expect(txMock.conversation.update).not.toHaveBeenCalled();
@@ -364,7 +375,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'desqualificado',
-      ),
+        1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(txMock.conversation.update).not.toHaveBeenCalled();
@@ -405,7 +416,7 @@ describe('CrmActionsService', () => {
       'sol-nascente',
       'conversa-1',
       'desqualificado',
-    );
+      1);
 
     expect(resultado).toEqual({
       tags: ['desqualificado'],
@@ -453,7 +464,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'cliente-antigo',
-      ),
+        1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(txMock.conversation.update).not.toHaveBeenCalled();
@@ -494,7 +505,7 @@ describe('CrmActionsService', () => {
       'sol-nascente',
       'conversa-1',
       'cliente-antigo',
-    );
+      1);
 
     expect(resultado).toEqual({
       tags: ['cliente-antigo'],
@@ -549,7 +560,7 @@ describe('CrmActionsService', () => {
       'sol-nascente',
       'conversa-1',
       'Qualificado',
-    );
+      1);
 
     expect(resultado).toEqual({
       estagio_atual: 'Qualificado',
@@ -604,7 +615,7 @@ describe('CrmActionsService', () => {
       'sol-nascente',
       'conversa-1',
       'Qualificado',
-      true,
+      1, true,
     );
 
     expect(resultado).toEqual({
@@ -660,7 +671,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'Qualificado',
-      ),
+        1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(txMock.conversation.update).not.toHaveBeenCalled();
@@ -708,7 +719,7 @@ describe('CrmActionsService', () => {
       'sol-nascente',
       'conversa-1',
       'Desqualificado',
-    );
+      1);
 
     expect(resultado).toEqual({
       estagio_atual: 'Desqualificado',
@@ -758,7 +769,7 @@ describe('CrmActionsService', () => {
     qualificationServiceMock.avaliar.mockReturnValue('TRANSFERIR_HUMANO');
 
     await expect(
-      service.moverEstagio('sol-nascente', 'conversa-1', 'Humano'),
+      service.moverEstagio('sol-nascente', 'conversa-1', 'Humano', 1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(txMock.conversation.update).not.toHaveBeenCalled();
@@ -806,7 +817,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'Qualificado',
-      ),
+        1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(txMock.conversation.update).not.toHaveBeenCalled();
@@ -854,7 +865,7 @@ describe('CrmActionsService', () => {
       'sol-nascente',
       'conversa-1',
       'Qualificacao',
-    );
+      1);
 
     expect(resultado).toEqual({
       estagio_atual: 'Qualificacao',
@@ -907,7 +918,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'Qualificado',
-      ),
+        1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(qualificationServiceMock.avaliar).not.toHaveBeenCalled();
@@ -943,7 +954,7 @@ describe('CrmActionsService', () => {
     txMock.auditLog.create.mockResolvedValue({});
 
     await expect(
-      service.moverEstagio('sol-nascente', 'conversa-1', 'Qualificacao'),
+      service.moverEstagio('sol-nascente', 'conversa-1', 'Qualificacao', 1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(qualificationServiceMock.avaliar).not.toHaveBeenCalled();
@@ -980,7 +991,7 @@ describe('CrmActionsService', () => {
     txMock.auditLog.create.mockResolvedValue({});
 
     await expect(
-      service.moverEstagio('sol-nascente', 'conversa-1', 'Desqualificado'),
+      service.moverEstagio('sol-nascente', 'conversa-1', 'Desqualificado', 1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(txMock.conversation.update).not.toHaveBeenCalled();
@@ -1023,7 +1034,7 @@ describe('CrmActionsService', () => {
     txMock.auditLog.create.mockResolvedValue({});
 
     await expect(
-      service.moverEstagio('sol-nascente', 'conversa-1', '   '),
+      service.moverEstagio('sol-nascente', 'conversa-1', '   ', 1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(txMock.conversation.update).not.toHaveBeenCalled();
@@ -1067,7 +1078,7 @@ describe('CrmActionsService', () => {
     qualificationServiceMock.avaliar.mockReturnValue('QUALIFICADO');
 
     await expect(
-      service.moverEstagio('sol-nascente', 'conversa-1', 'Agendado'),
+      service.moverEstagio('sol-nascente', 'conversa-1', 'Agendado', 1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(txMock.conversation.update).not.toHaveBeenCalled();
@@ -1088,7 +1099,7 @@ describe('CrmActionsService', () => {
         'ecovolt-sul',
         'conversa-1',
         'Qualificacao',
-      ),
+        1),
     ).rejects.toThrow(NotFoundException);
 
     expect(txMock.conversation.update).not.toHaveBeenCalled();
@@ -1116,7 +1127,7 @@ describe('CrmActionsService', () => {
     });
 
     await expect(
-      service.moverEstagio('sol-nascente', 'conversa-1', 'Qualificado'),
+      service.moverEstagio('sol-nascente', 'conversa-1', 'Qualificado', 1),
     ).rejects.toThrow(ForbiddenException);
 
     expect(txMock.auditLog.create).toHaveBeenCalledWith({
@@ -1136,7 +1147,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'quinta-09',
-      );
+        1);
 
       expect(resultado).toEqual({
         sucesso: true,
@@ -1177,6 +1188,7 @@ describe('CrmActionsService', () => {
           id: 'conversa-1',
           tenant_id: 'sol-nascente',
           estado: 'PROCESSANDO',
+          version: 1,
         },
         data: {
           estagio_atual: 'Agendado',
@@ -1212,7 +1224,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'quinta-09',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(txMock.scheduleSlot.updateMany).not.toHaveBeenCalled();
@@ -1243,7 +1255,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'quinta-09',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(qualificationServiceMock.avaliar).not.toHaveBeenCalled();
@@ -1262,7 +1274,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'quinta-09',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(txMock.scheduleSlot.updateMany).not.toHaveBeenCalled();
@@ -1278,7 +1290,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'quinta-09',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(txMock.scheduleSlot.updateMany).not.toHaveBeenCalled();
@@ -1296,7 +1308,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'quinta-09',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(txMock.scheduleSlot.updateMany).not.toHaveBeenCalled();
@@ -1314,7 +1326,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'quinta-09',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(txMock.conversation.updateMany).not.toHaveBeenCalled();
@@ -1330,7 +1342,7 @@ describe('CrmActionsService', () => {
           'ecovolt-sul',
           'conversa-1',
           'quinta-09',
-        ),
+          1),
       ).rejects.toThrow(NotFoundException);
 
       expect(txMock.scheduleSlot.updateMany).not.toHaveBeenCalled();
@@ -1349,7 +1361,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'quinta-09',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(txMock.scheduleSlot.updateMany).toHaveBeenCalled();
@@ -1485,7 +1497,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'Lead interessado em energia solar.',
-        true,
+        1, true,
       );
 
       expect('sucesso' in resultado).toBe(true);
@@ -1516,7 +1528,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'Lead interessado em energia solar.',
-        false,
+        1, false,
       );
 
       expect('sucesso' in resultado).toBe(true);
@@ -1549,7 +1561,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'Lead interessado.',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(txMock.auditLog.create).toHaveBeenCalledWith({
@@ -1578,7 +1590,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'Lead interessado.',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(qualificationServiceMock.avaliar).not.toHaveBeenCalled();
@@ -1602,7 +1614,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'Lead interessado.',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(qualificationServiceMock.avaliar).not.toHaveBeenCalled();
@@ -1616,7 +1628,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           '   ',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(txMock.auditLog.create).toHaveBeenCalledWith({
@@ -1636,7 +1648,7 @@ describe('CrmActionsService', () => {
           'ecovolt-sul',
           'conversa-1',
           'Lead interessado.',
-        ),
+          1),
       ).rejects.toThrow(NotFoundException);
 
       expect(txMock.auditLog.create).not.toHaveBeenCalled();
@@ -1679,7 +1691,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'Cliente solicitou atendimento humano.',
-      );
+        1);
 
       expect('sucesso' in resultado).toBe(true);
 
@@ -1745,7 +1757,7 @@ describe('CrmActionsService', () => {
         'sol-nascente',
         'conversa-1',
         'Cliente solicitou atendimento humano.',
-      );
+        1);
 
       expect(txMock.conversation.updateMany).toHaveBeenCalledWith({
         where: {
@@ -1788,7 +1800,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'Solicitação do cliente.',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(txMock.conversation.updateMany).not.toHaveBeenCalled();
@@ -1803,7 +1815,7 @@ describe('CrmActionsService', () => {
       configurarCenarioTransferencia();
 
       await expect(
-        service.transferirHumano('sol-nascente', 'conversa-1', '   '),
+        service.transferirHumano('sol-nascente', 'conversa-1', '   ', 1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(txMock.conversation.updateMany).not.toHaveBeenCalled();
@@ -1825,7 +1837,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'Solicitação do cliente.',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(txMock.conversation.updateMany).not.toHaveBeenCalled();
@@ -1841,7 +1853,7 @@ describe('CrmActionsService', () => {
           'sol-nascente',
           'conversa-1',
           'Solicitação do cliente.',
-        ),
+          1),
       ).rejects.toThrow(ForbiddenException);
 
       expect(txMock.auditLog.create).toHaveBeenCalledWith({
@@ -1862,7 +1874,7 @@ describe('CrmActionsService', () => {
           'ecovolt-sul',
           'conversa-1',
           'Solicitação do cliente.',
-        ),
+          1),
       ).rejects.toThrow(NotFoundException);
 
       expect(txMock.conversation.updateMany).not.toHaveBeenCalled();

@@ -26,6 +26,7 @@ describe('ToolExecutorService', () => {
   const contexto = {
     tenantId: 'sol-nascente',
     conversaId: 'conversa-1',
+    expectedVersion: 2,
   };
 
   beforeEach(async () => {
@@ -320,6 +321,7 @@ describe('ToolExecutorService', () => {
         {
           tenantId: '',
           conversaId: 'conversa-1',
+          expectedVersion: 2,
         },
       ),
     ).rejects.toThrow(BadRequestException);
@@ -333,6 +335,7 @@ describe('ToolExecutorService', () => {
         {
           tenantId: 'sol-nascente',
           conversaId: '',
+          expectedVersion: 2,
         },
       ),
     ).rejects.toThrow(BadRequestException);

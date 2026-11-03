@@ -4,12 +4,30 @@ import { InterventionService } from './intervention.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { TenantsService } from '../tenants/tenants.service.js';
 import { jest, describe, expect, it, beforeEach } from '@jest/globals';
+import { ConversationQueueService } from '../queue/conversation-queue.service.js';
 
 describe('InterventionService', () => {
   let service: InterventionService;
   let tx: any;
-  let prismaMock: { $transaction: jest.Mock };
+
+  let prismaMock: {
+    $transaction: jest.Mock;
+    message: {
+      findFirst: jest.Mock<() => Promise<any>>;
+    };
+  };
+
   let tenantsService: { findById: jest.Mock };
+
+  const conversationQueueMock = {
+    cancelarProcessamento: jest.fn<
+      (tenantId: string, conversationId: string) => Promise<void>
+    >().mockResolvedValue(undefined),
+
+    agendarProcessamento: jest.fn<
+      (tenantId: string, conversationId: string) => Promise<void>
+    >().mockResolvedValue(undefined),
+  };
 
   const conversa = {
     id: 'conversation-1',
@@ -20,16 +38,21 @@ describe('InterventionService', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     tx = {
       conversation: {
         findUnique: jest.fn(),
         updateMany: jest.fn<() => Promise<{ count: number }>>()
           .mockResolvedValue({ count: 1 }),
       },
+
       message: {
         updateMany: jest.fn<() => Promise<{ count: number }>>()
           .mockResolvedValue({ count: 1 }),
+        findFirst: jest.fn<() => Promise<any>>(),
       },
+
       auditLog: {
         create: jest.fn<() => Promise<Record<string, never>>>()
           .mockResolvedValue({}),
@@ -38,6 +61,10 @@ describe('InterventionService', () => {
 
     prismaMock = {
       $transaction: jest.fn((callback: any) => callback(tx)),
+      message: {
+        findFirst: jest.fn<() => Promise<any>>()
+          .mockResolvedValue(null),
+      },
     };
 
     tenantsService = {
@@ -48,6 +75,7 @@ describe('InterventionService', () => {
     service = new InterventionService(
       prismaMock as unknown as PrismaService,
       tenantsService as unknown as TenantsService,
+      conversationQueueMock as unknown as ConversationQueueService,
     );
   });
 
@@ -81,6 +109,19 @@ describe('InterventionService', () => {
 
     expect(tx.message.updateMany).toHaveBeenCalled();
     expect(tx.auditLog.create).toHaveBeenCalled();
+  });
+
+  it('deve cancelar o processamento da fila ao assumir uma conversa', async () => {
+    tx.conversation.findUnique.mockResolvedValue(conversa);
+
+    await service.executar({
+      tenant_id: 'tenant-1',
+      telefone: '5581999990000',
+      acao: 'assumir',
+    });
+
+    expect(conversationQueueMock.cancelarProcessamento)
+      .toHaveBeenCalledWith('tenant-1', 'conversation-1');
   });
 
   it('deve tratar assumir uma conversa já assumida como idempotente', async () => {
@@ -126,6 +167,28 @@ describe('InterventionService', () => {
     expect(tx.auditLog.create).toHaveBeenCalled();
   });
 
+  it('deve agendar processamento ao religar a IA com mensagem pendente', async () => {
+    tx.conversation.findUnique.mockResolvedValue({
+      ...conversa,
+      estado: 'HUMANO_ATIVO',
+    });
+
+    prismaMock.message.findFirst.mockResolvedValue({
+      id: 'message-1',
+      status: 'PENDING',
+      autor: 'lead',
+    });
+
+    await service.executar({
+      tenant_id: 'tenant-1',
+      telefone: '5581999990000',
+      acao: 'religar',
+    });
+
+    expect(conversationQueueMock.agendarProcessamento)
+      .toHaveBeenCalledWith('tenant-1', 'conversation-1');
+  });
+
   it('não deve permitir religar a IA durante PROCESSANDO', async () => {
     tx.conversation.findUnique.mockResolvedValue(conversa);
 
@@ -138,6 +201,7 @@ describe('InterventionService', () => {
     ).rejects.toThrow(ConflictException);
 
     expect(tx.conversation.updateMany).not.toHaveBeenCalled();
+
     expect(tx.auditLog.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({

@@ -1,5 +1,5 @@
 
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException, } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, ConflictException, } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QualificationService } from '../qualification/qualification.service.js';
 
@@ -19,9 +19,16 @@ export class CrmActionsService {
     tenantId: string,
     conversaId: string,
     tag: TagPermitida,
+    expectedVersion: number,
     simulacao = false,
   ) {
     const resultado = await this.prisma.$transaction(async (tx) => {
+      await this.validarVersaoDaConversa(
+        tx,
+        tenantId,
+        conversaId,
+        expectedVersion,
+      );
       const conversa = await tx.conversation.findFirst({
         where: {
           id: conversaId,
@@ -193,9 +200,16 @@ export class CrmActionsService {
     tenantId: string,
     conversaId: string,
     estagio: string,
+    expectedVersion: number,
     simulacao = false,
   ) {
     const resultado = await this.prisma.$transaction(async (tx) => {
+      await this.validarVersaoDaConversa(
+        tx,
+        tenantId,
+        conversaId,
+        expectedVersion,
+      );
       const conversa = await tx.conversation.findFirst({
         where: {
           id: conversaId,
@@ -430,8 +444,15 @@ export class CrmActionsService {
     tenantId: string,
     conversaId: string,
     codigoHorario: string,
+    expectedVersion: number,
   ) {
     const resultado = await this.prisma.$transaction(async (tx) => {
+      await this.validarVersaoDaConversa(
+        tx,
+        tenantId,
+        conversaId,
+        expectedVersion,
+      );
       const conversa = await tx.conversation.findFirst({
         where: {
           id: conversaId,
@@ -562,6 +583,7 @@ export class CrmActionsService {
           id: conversaId,
           tenant_id: tenantId,
           estado: 'PROCESSANDO',
+          version: expectedVersion,
         },
         data: {
           estagio_atual: 'Agendado',
@@ -635,9 +657,16 @@ export class CrmActionsService {
     tenantId: string,
     conversaId: string,
     resumo: string,
+    expectedVersion: number,
     simulacao = false,
   ) {
     const resultadoTransacao = await this.prisma.$transaction(async (tx) => {
+      await this.validarVersaoDaConversa(
+        tx,
+        tenantId,
+        conversaId,
+        expectedVersion,
+      );
       const conversa = await tx.conversation.findFirst({
         where: {
           id: conversaId,
@@ -743,8 +772,15 @@ export class CrmActionsService {
     tenantId: string,
     conversaId: string,
     motivo: string,
+    expectedVersion: number,
   ) {
     const resultadoTransacao = await this.prisma.$transaction(async (tx) => {
+      await this.validarVersaoDaConversa(
+        tx,
+        tenantId,
+        conversaId,
+        expectedVersion,
+      );
       const conversa = await tx.conversation.findFirst({
         where: {
           id: conversaId,
@@ -820,7 +856,7 @@ export class CrmActionsService {
           id: conversaId,
           tenant_id: tenantId,
           estado: 'PROCESSANDO',
-          version: conversa.version,
+          version: expectedVersion,
         },
         data: {
           estado: 'HUMANO_PENDENTE',
@@ -865,5 +901,42 @@ export class CrmActionsService {
     }
 
     return resultadoTransacao;
+  }
+
+  private async validarVersaoDaConversa(
+    tx: {
+      $queryRaw<T = unknown>(
+        query: TemplateStringsArray,
+        ...values: unknown[]
+      ): Promise<T>;
+    },
+    tenantId: string,
+    conversaId: string,
+    expectedVersion: number,
+  ) {
+    const conversas = await tx.$queryRaw<
+      { id: string; estado: string; version: number }[]
+    >`
+      SELECT id, estado, version
+      FROM conversations
+      WHERE id = ${conversaId}::uuid
+        AND tenant_id = ${tenantId}
+      FOR UPDATE
+    `;
+
+    if (conversas.length === 0) {
+      throw new NotFoundException(
+        'Conversa não encontrada para este tenant.',
+      );
+    }
+
+    if (
+      conversas[0].estado !== 'PROCESSANDO' ||
+      conversas[0].version !== expectedVersion
+    ) {
+      throw new ConflictException(
+        'A conversa foi alterada ou assumida por um humano. A execução da ferramenta foi bloqueada.',
+      );
+    }
   }
 }

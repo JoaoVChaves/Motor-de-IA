@@ -10,6 +10,7 @@ import { LlmModule } from './llm/llm.module.js';
 import { InterventionModule } from './intervention/intervention.module.js';
 import { ConversationsModule } from './conversations/conversations.module.js';
 import { WebhookModule } from './webhook/webhook.module.js';
+import { QueueModule } from './queue/queue.module.js';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { WebhookModule } from './webhook/webhook.module.js';
     InterventionModule,
     ConversationsModule,
     WebhookModule,
+    QueueModule,
   ],
   controllers: [HealthController],
 })

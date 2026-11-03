@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, ConflictException, } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QualificationService } from '../qualification/qualification.service.js';
 
@@ -23,6 +23,7 @@ export class CrmService {
     tenantId: string,
     conversaId: string,
     dadosExtraidos: DadosExtraidos,
+    expectedVersion: number,
   ) {
     const dadosValidos: Record<string, unknown> = {};
 
@@ -131,19 +132,28 @@ export class CrmService {
     }
 
     return this.prisma.$transaction(async (tx) => {
-      const conversa = await tx.conversation.findFirst({
-        where: {
-          id: conversaId,
-          tenant_id: tenantId,
-        },
-        select: {
-          id: true,
-        },
-      });
+      const conversa = await tx.$queryRaw<
+        { id: string; estado: string; version: number }[]
+      >`
+        SELECT id, estado, version
+        FROM conversations
+        WHERE id = ${conversaId}::uuid
+          AND tenant_id = ${tenantId}
+        FOR UPDATE
+      `;
 
-      if (!conversa) {
+      if (conversa.length === 0) {
         throw new NotFoundException(
           'Conversa não encontrada para este tenant.',
+        );
+      }
+
+      if (
+        conversa[0].estado !== 'PROCESSANDO' ||
+        conversa[0].version !== expectedVersion
+      ) {
+        throw new ConflictException(
+          'A conversa foi alterada ou assumida por um humano. A atualização da ficha foi bloqueada.',
         );
       }
 

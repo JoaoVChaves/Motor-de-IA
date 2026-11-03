@@ -7,12 +7,14 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { TenantsService } from '../tenants/tenants.service.js';
 import { InterventionDto } from './dto/intervention.dto.js';
+import { ConversationQueueService } from '../queue/conversation-queue.service.js';
 
 @Injectable()
 export class InterventionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenantsService: TenantsService,
+    private readonly conversationQueue: ConversationQueueService,
   ) {}
 
   async executar(dto: InterventionDto) {
@@ -43,6 +45,7 @@ export class InterventionService {
           sucesso: true,
           estado: 'HUMANO_ATIVO',
           ja_estava_assumida: true,
+          conversationId: conversa.id,
         };
       }
 
@@ -125,6 +128,7 @@ export class InterventionService {
         sucesso: true,
         estado: novoEstado,
         version: conversa.version + 1,
+        conversationId: conversa.id,
       };
     });
 
@@ -132,6 +136,39 @@ export class InterventionService {
       throw new ConflictException(resultado.motivoRejeicao);
     }
 
-    return resultado;
+    // Após assumir, cancela os jobs que ainda não começaram.
+    if (acao === 'assumir') {
+      await this.conversationQueue.cancelarProcessamento(
+        tenant_id,
+        resultado.conversationId,
+      );
+    }
+
+    // Após religar, verifica se existem mensagens pendentes do lead.
+    if (acao === 'religar') {
+      const mensagemPendente = await this.prisma.message.findFirst({
+        where: {
+          tenant_id,
+          conversation_id: resultado.conversationId,
+          autor: 'lead',
+          status: 'PENDING',
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (mensagemPendente) {
+        await this.conversationQueue.agendarProcessamento(
+          tenant_id,
+          resultado.conversationId,
+        );
+      }
+    }
+
+    // Remove o identificador interno da resposta HTTP.
+    const { conversationId, ...resposta } = resultado;
+
+    return resposta;
   }
 }

@@ -4,6 +4,7 @@ import { NotFoundException } from '@nestjs/common';
 import { WebhookService } from './webhook.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { TenantsService } from '../tenants/tenants.service.js';
+import { ConversationQueueService } from '../queue/conversation-queue.service.js';
 
 describe('WebhookService', () => {
   let service: WebhookService;
@@ -18,6 +19,10 @@ describe('WebhookService', () => {
     texto: 'Olá, gostaria de saber mais.',
     autor: 'lead' as const,
     simulacao: false,
+  };
+
+  const conversationQueueMock = {
+    agendarProcessamento: jest.fn(),
   };
 
   const conversa = {
@@ -54,6 +59,8 @@ describe('WebhookService', () => {
       },
     };
 
+    conversationQueueMock.agendarProcessamento.mockReset();
+
     prismaMock = {
       $transaction: jest.fn((callback: any) => callback(tx)),
       message: {
@@ -69,6 +76,7 @@ describe('WebhookService', () => {
     service = new WebhookService(
       prismaMock as unknown as PrismaService,
       tenantsService as unknown as TenantsService,
+      conversationQueueMock as unknown as ConversationQueueService,
     );
   });
 
@@ -110,6 +118,13 @@ describe('WebhookService', () => {
     });
 
     expect(tx.message.create).toHaveBeenCalled();
+
+    expect(conversationQueueMock.agendarProcessamento).toHaveBeenCalledTimes(1);
+
+    expect(conversationQueueMock.agendarProcessamento).toHaveBeenCalledWith(
+      'tenant-1',
+      'conversation-1',
+    );
   });
 
   it('deve identificar uma mensagem duplicada sem criar outra', async () => {
@@ -129,6 +144,7 @@ describe('WebhookService', () => {
 
     expect(tx.conversation.upsert).not.toHaveBeenCalled();
     expect(tx.message.create).not.toHaveBeenCalled();
+    expect(conversationQueueMock.agendarProcessamento).not.toHaveBeenCalled();
   });
 
   it('deve registrar mensagens humanas como PROCESSED', async () => {
@@ -147,6 +163,7 @@ describe('WebhookService', () => {
         }),
       }),
     );
+    expect(conversationQueueMock.agendarProcessamento).not.toHaveBeenCalled();
   });
 
   it('deve ignorar mensagens do lead quando um humano estiver atendendo', async () => {
@@ -158,6 +175,7 @@ describe('WebhookService', () => {
     const resultado = await service.receberMensagem(dto);
 
     expect(resultado.status).toBe('IGNORED_HUMAN');
+    expect(conversationQueueMock.agendarProcessamento).not.toHaveBeenCalled();
   });
 
   it('deve ignorar mensagens do lead quando a conversa estiver HUMANO_PENDENTE', async () => {
@@ -169,6 +187,7 @@ describe('WebhookService', () => {
     const resultado = await service.receberMensagem(dto);
 
     expect(resultado.status).toBe('IGNORED_HUMAN');
+    expect(conversationQueueMock.agendarProcessamento).not.toHaveBeenCalled();
   });
 
   it('deve manter mensagens do lead como PENDING durante PROCESSANDO', async () => {
@@ -180,6 +199,10 @@ describe('WebhookService', () => {
     const resultado = await service.receberMensagem(dto);
 
     expect(resultado.status).toBe('PENDING');
+    expect(conversationQueueMock.agendarProcessamento).toHaveBeenCalledWith(
+      'tenant-1',
+      'conversation-1',
+    );
   });
 
   it('deve rejeitar mensagens de um tenant inexistente', async () => {

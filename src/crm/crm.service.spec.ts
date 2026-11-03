@@ -1,23 +1,21 @@
-import { BadRequestException, NotFoundException, } from '@nestjs/common';
+
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CrmService } from './crm.service.js';
 import { QualificationService } from '../qualification/qualification.service.js';
 
 const txMock = {
-  conversation: {
-    findFirst: jest.fn<
-      (args: {
-        where: {
-          id: string;
-          tenant_id: string;
-        };
-        select: {
-          id: true;
-        };
-      }) => Promise<{ id: string } | null>
-    >(),
-  },
+  $queryRaw: jest.fn<
+    (...args: any[]) => Promise<
+      { id: string; estado: string; version: number }[]
+    >
+  >(),
+
   leadSheet: {
     upsert: jest.fn<
       (args: {
@@ -51,6 +49,18 @@ const prismaMock = {
 describe('CrmService', () => {
   let service: CrmService;
 
+  const expectedVersion = 2;
+
+  const mockConversaValida = () => {
+    txMock.$queryRaw.mockResolvedValue([
+      {
+        id: 'conversa-1',
+        estado: 'PROCESSANDO',
+        version: expectedVersion,
+      },
+    ]);
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -72,9 +82,7 @@ describe('CrmService', () => {
 
   describe('atualizarFicha', () => {
     it('deve atualizar somente os campos válidos e ignorar os vazios', async () => {
-      txMock.conversation.findFirst.mockResolvedValue({
-        id: 'conversa-1',
-      });
+      mockConversaValida();
 
       const fichaAtualizada = {
         nome: 'Maria',
@@ -92,6 +100,7 @@ describe('CrmService', () => {
           valorConta: undefined,
           posseImovel: 'PROPRIO',
         },
+        expectedVersion,
       );
 
       expect(resultado).toEqual({
@@ -99,15 +108,7 @@ describe('CrmService', () => {
         qualificacao: 'INCOMPLETO',
       });
 
-      expect(txMock.conversation.findFirst).toHaveBeenCalledWith({
-        where: {
-          id: 'conversa-1',
-          tenant_id: 'sol-nascente',
-        },
-        select: {
-          id: true,
-        },
-      });
+      expect(txMock.$queryRaw).toHaveBeenCalledTimes(1);
 
       expect(txMock.leadSheet.upsert).toHaveBeenCalledWith({
         where: {
@@ -126,9 +127,7 @@ describe('CrmService', () => {
     });
 
     it('deve criar a ficha quando ela ainda não existe', async () => {
-      txMock.conversation.findFirst.mockResolvedValue({
-        id: 'conversa-1',
-      });
+      mockConversaValida();
 
       txMock.leadSheet.upsert.mockResolvedValue({
         nome: 'João',
@@ -140,6 +139,7 @@ describe('CrmService', () => {
         {
           nome: 'João',
         },
+        expectedVersion,
       );
 
       expect(txMock.leadSheet.upsert).toHaveBeenCalledWith(
@@ -163,6 +163,7 @@ describe('CrmService', () => {
           {
             posseImovel: 'CEDIDO',
           },
+          expectedVersion,
         ),
       ).rejects.toThrow(BadRequestException);
 
@@ -177,6 +178,7 @@ describe('CrmService', () => {
           {
             valorConta: '350',
           },
+          expectedVersion,
         ),
       ).rejects.toThrow(BadRequestException);
 
@@ -184,7 +186,7 @@ describe('CrmService', () => {
     });
 
     it('não deve atualizar quando a conversa não pertence ao tenant informado', async () => {
-      txMock.conversation.findFirst.mockResolvedValue(null);
+      txMock.$queryRaw.mockResolvedValue([]);
 
       await expect(
         service.atualizarFicha(
@@ -193,6 +195,7 @@ describe('CrmService', () => {
           {
             nome: 'Maria',
           },
+          expectedVersion,
         ),
       ).rejects.toThrow(NotFoundException);
 
@@ -200,9 +203,7 @@ describe('CrmService', () => {
     });
 
     it('deve ignorar strings contendo apenas espaços', async () => {
-      txMock.conversation.findFirst.mockResolvedValue({
-        id: 'conversa-1',
-      });
+      mockConversaValida();
 
       txMock.leadSheet.upsert.mockResolvedValue({
         nome: 'Maria',
@@ -215,6 +216,7 @@ describe('CrmService', () => {
           nome: 'Maria',
           cidade: '   ',
         },
+        expectedVersion,
       );
 
       expect(txMock.leadSheet.upsert).toHaveBeenCalledWith({
@@ -239,10 +241,35 @@ describe('CrmService', () => {
           {
             nome: 'não informado',
           },
+          expectedVersion,
         ),
       ).rejects.toThrow(BadRequestException);
 
       expect(prismaMock.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('deve bloquear a atualização quando o estado ou a versão forem diferentes', async () => {
+      txMock.$queryRaw.mockResolvedValue([
+        {
+          id: 'conversa-1',
+          estado: 'HUMANO_ATIVO',
+          version: 3,
+        },
+      ]);
+
+      await expect(
+        service.atualizarFicha(
+          'sol-nascente',
+          'conversa-1',
+          {
+            nome: 'Maria',
+          },
+          expectedVersion,
+        ),
+      ).rejects.toThrow(ConflictException);
+
+      expect(txMock.leadSheet.upsert).not.toHaveBeenCalled();
+      expect(txMock.tenant.findUnique).not.toHaveBeenCalled();
     });
   });
 });

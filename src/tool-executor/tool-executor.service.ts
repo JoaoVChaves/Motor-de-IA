@@ -1,3 +1,4 @@
+
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CrmService } from '../crm/crm.service.js';
 import { CrmActionsService } from '../crm-actions/crm-actions.service.js';
@@ -5,6 +6,7 @@ import { CrmActionsService } from '../crm-actions/crm-actions.service.js';
 interface ToolContext {
   tenantId: string;
   conversaId: string;
+  expectedVersion: number;
   simulacao?: boolean;
 }
 
@@ -60,6 +62,7 @@ export class ToolExecutorService {
             contexto.tenantId,
             contexto.conversaId,
             args.tag as 'qualificado' | 'desqualificado' | 'cliente-antigo',
+            contexto.expectedVersion,
             contexto.simulacao ?? false,
           ),
         };
@@ -74,6 +77,7 @@ export class ToolExecutorService {
             contexto.tenantId,
             contexto.conversaId,
             args.estagio as string,
+            contexto.expectedVersion,
             contexto.simulacao ?? false,
           ),
         };
@@ -98,6 +102,7 @@ export class ToolExecutorService {
             contexto.tenantId,
             contexto.conversaId,
             args.codigo_horario as string,
+            contexto.expectedVersion,
           ),
         };
 
@@ -111,6 +116,7 @@ export class ToolExecutorService {
             contexto.tenantId,
             contexto.conversaId,
             args.resumo as string,
+            contexto.expectedVersion,
             contexto.simulacao ?? false,
           ),
         };
@@ -134,6 +140,7 @@ export class ToolExecutorService {
             contexto.tenantId,
             contexto.conversaId,
             args.motivo as string,
+            contexto.expectedVersion,
           ),
         };
 
@@ -216,6 +223,7 @@ export class ToolExecutorService {
       contexto.tenantId,
       contexto.conversaId,
       dadosExtraidos,
+      contexto.expectedVersion,
     );
   }
 
@@ -229,6 +237,15 @@ export class ToolExecutorService {
     ) {
       throw new BadRequestException(
         'Contexto de execução inválido.',
+      );
+    }
+
+    if (
+      !Number.isInteger(contexto.expectedVersion) ||
+      contexto.expectedVersion < 0
+    ) {
+      throw new BadRequestException(
+        'A versão esperada da conversa deve ser um número inteiro não negativo.',
       );
     }
 
