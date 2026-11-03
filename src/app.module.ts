@@ -1,6 +1,7 @@
 
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import Joi from 'joi';
 import { HealthController } from './health.controller.js';
 import { PrismaModule } from './prisma/prisma.module.js';
@@ -30,6 +31,7 @@ import { QueueModule } from './queue/queue.module.js';
         REDIS_PORT: Joi.number().default(6379),
       }),
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     TenantsModule,
     ToolExecutorModule,

@@ -109,4 +109,25 @@ describe('ConversationQueueService', () => {
       }),
     );
   });
+
+  it('deve lidar com nova mensagem quando o job do próximo turno estiver ativo', async () => {
+    const jobPrincipal = {
+      getState: jest.fn<() => Promise<string>>()
+        .mockResolvedValue('active'),
+    };
+
+    const jobProximoTurno = {
+      getState: jest.fn<() => Promise<string>>()
+        .mockResolvedValue('active'),
+    };
+
+    queue.getJob
+      .mockResolvedValueOnce(jobPrincipal)
+      .mockResolvedValueOnce(jobProximoTurno);
+
+    await service.agendarProcessamento(tenantId, conversationId);
+
+    expect(queue.getJob).toHaveBeenCalledTimes(2);
+    expect(queue.add).not.toHaveBeenCalled();
+  });
 });

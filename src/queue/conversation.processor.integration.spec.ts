@@ -6,6 +6,7 @@ import { Queue, QueueEvents } from 'bullmq';
 
 import { QueueModule } from './queue.module.js';
 import { CONVERSATION_QUEUE } from './queue.constants.js';
+import { PrismaModule } from '../prisma/prisma.module.js';
 
 describe('ConversationProcessor (integração)', () => {
   jest.setTimeout(20000);
@@ -18,6 +19,7 @@ describe('ConversationProcessor (integração)', () => {
       moduleRef = await Test.createTestingModule({
         imports: [
           ConfigModule.forRoot({ isGlobal: true }),
+          PrismaModule,
           QueueModule,
         ],
       }).compile();
@@ -29,10 +31,7 @@ describe('ConversationProcessor (integração)', () => {
       );
 
       queueEvents = new QueueEvents(CONVERSATION_QUEUE, {
-        connection: {
-          host: process.env.REDIS_HOST ?? 'localhost',
-          port: Number(process.env.REDIS_PORT ?? 6379),
-        },
+        connection: queue.opts.connection,
       });
 
       await queueEvents.waitUntilReady();
@@ -41,7 +40,7 @@ describe('ConversationProcessor (integração)', () => {
         'process-conversation',
         {
           tenantId: 'tenant-integration',
-          conversationId: 'conversation-integration',
+          conversationId: '00000000-0000-4000-8000-000000000001',
         },
         {
           jobId: `worker-integration-${Date.now()}`,
@@ -50,9 +49,11 @@ describe('ConversationProcessor (integração)', () => {
         },
       );
 
-      await expect(
-        job.waitUntilFinished(queueEvents, 10000),
-      ).resolves.toBeNull();
+      
+      await job.waitUntilFinished(queueEvents, 10000);
+
+      expect(await job.getState()).toBe('completed');
+
     } finally {
       await queueEvents?.close();
       await moduleRef?.close();

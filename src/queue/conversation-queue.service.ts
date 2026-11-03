@@ -77,7 +77,7 @@ export class ConversationQueueService {
         attempts: 3,
         backoff: {
           type: 'exponential',
-          delay: 15000,
+          delay: 2000,
         },
         removeOnComplete: true,
         removeOnFail: 1000,
@@ -107,5 +107,59 @@ export class ConversationQueueService {
 
       await job.remove();
     }
+  }
+
+  async garantirProcessamento(
+    tenantId: string,
+    conversationId: string,
+  ) {
+    const jobId = `debounce-${tenantId}-${conversationId}`;
+
+    const jobExistente = await this.queue.getJob(jobId);
+
+    if (jobExistente) {
+      const estado = await jobExistente.getState();
+
+      if (estado === 'active') {
+        return this.garantirProximoTurno(tenantId, conversationId);
+      }
+
+      if (
+        ['waiting', 'delayed', 'paused', 'waiting-children', 'prioritized'].includes(
+          estado,
+        )
+      ) {
+        return jobExistente;
+      }
+
+      await jobExistente.remove();
+    }
+
+    return this.criarJob(jobId, tenantId, conversationId);
+  }
+
+  private async garantirProximoTurno(
+    tenantId: string,
+    conversationId: string,
+  ) {
+    const jobId = `debounce-next-${tenantId}-${conversationId}`;
+
+    const jobExistente = await this.queue.getJob(jobId);
+
+    if (jobExistente) {
+      const estado = await jobExistente.getState();
+
+      if (
+        ['active', 'waiting', 'delayed', 'paused', 'waiting-children', 'prioritized'].includes(
+          estado,
+        )
+      ) {
+        return jobExistente;
+      }
+
+      await jobExistente.remove();
+    }
+
+    return this.criarJob(jobId, tenantId, conversationId);
   }
 }
