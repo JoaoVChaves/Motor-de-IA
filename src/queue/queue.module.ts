@@ -35,7 +35,7 @@ import { TenantsModule } from '../tenants/tenants.module.js';
         attempts: 3,
         backoff: {
           type: 'exponential',
-          delay: 2000,
+          delay: 3000,
         },
         removeOnComplete: true,
         removeOnFail: 1000,

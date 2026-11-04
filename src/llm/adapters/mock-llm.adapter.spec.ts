@@ -12,7 +12,7 @@ describe('MockLlmAdapter', () => {
     const response = await adapter.generateTurn();
 
     expect(response).toEqual({
-      content: 'Resposta simulada pelo MockLlmAdapter.',
+      content: 'Obrigado pelo contato! Como posso ajudar?',
       toolCalls: [],
       provider: 'mock',
       model: 'mock-model',

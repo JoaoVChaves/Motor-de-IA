@@ -10,6 +10,7 @@ import {
 } from '../llm/llm.module.js';
 import { randomUUID } from 'node:crypto';
 import type { Job } from 'bullmq';
+import { UnrecoverableError } from 'bullmq';
 import { CONVERSATION_QUEUE } from './queue.constants.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RedisLockService } from './redis-lock.service.js';
@@ -649,7 +650,9 @@ export class ConversationProcessor extends WorkerHost {
 
     const tentativasMaximas = job.opts.attempts ?? 1;
 
-    if (job.attemptsMade < tentativasMaximas) {
+    const erroPermanente = error instanceof UnrecoverableError;
+
+    if (!erroPermanente && job.attemptsMade < tentativasMaximas) {
       return;
     }
 
@@ -813,12 +816,34 @@ export class ConversationProcessor extends WorkerHost {
       conversationId,
     );
 
-    const resposta = await this.llmProvider.generateTurn({
-      systemPrompt,
-      messages: historico,
-      tools: ferramentas,
-      temperature: 0.2,
-    });
+    let resposta: LlmCompletionResponse;
+
+    try {
+      resposta = await this.llmProvider.generateTurn({
+        systemPrompt,
+        messages: historico,
+        tools: ferramentas,
+        temperature: 0.2,
+      });
+    } catch (error) {
+      const status =
+        typeof error === 'object' && error !== null && 'status' in error
+          ? Number(error.status)
+          : undefined;
+
+      const errosPermanentes = [400, 401, 403, 404];
+
+      if (status !== undefined && errosPermanentes.includes(status)) {
+        const mensagem =
+          error instanceof Error ? error.message : String(error);
+
+        throw new UnrecoverableError(
+          `Erro permanente do provedor LLM (HTTP ${status}): ${mensagem}`,
+        );
+      }
+
+      throw error;
+    }
 
     return this.turnStepService.salvar({
       tenantId,
@@ -902,10 +927,34 @@ export class ConversationProcessor extends WorkerHost {
           );
         }
 
-        const acoesObrigatorias = [
-          'adicionar_tag',
-          'mover_estagio',
-        ];
+        const estagioQualificacao = acoesExecutadas.includes(
+          'estagio:Qualificacao',
+        );
+
+        const estagioFinal = acoesExecutadas.some(
+          (acao) =>
+            acao === 'estagio:Qualificado' ||
+            acao === 'estagio:Desqualificado',
+        );
+
+        const transferenciaExecutada =
+          acoesExecutadas.includes('transferir_humano');
+
+        let acoesObrigatorias: string[] = [];
+
+        if (!transferenciaExecutada) {
+          if (estagioFinal) {
+            acoesObrigatorias = [
+              'adicionar_tag',
+              'mover_estagio',
+            ];
+          } else {
+            acoesObrigatorias = [
+              'mover_estagio',
+              'estagio:Qualificacao',
+            ];
+          }
+        }
 
         const acoesPendentes = acoesObrigatorias.filter(
           (acao) => !acoesExecutadas.includes(acao),
@@ -916,7 +965,13 @@ export class ConversationProcessor extends WorkerHost {
             role: 'user',
             content:
               `Antes de responder ao lead, execute as ações obrigatórias ` +
-              `de CRM que ainda faltam: ${acoesPendentes.join(', ')}. ` +
+              `de CRM que ainda faltam: ${acoesPendentes
+                .map((acao) =>
+                  acao.startsWith('estagio:')
+                    ? `mover_estagio(${acao.replace('estagio:', '')})`
+                    : acao,
+                )
+                .join(', ')}. ` +
               `Use somente informações confirmadas na conversa e na ficha. ` +
               `Não invente classificações ou estágios.`,
           });
@@ -969,6 +1024,13 @@ export class ConversationProcessor extends WorkerHost {
           );
 
           acoesExecutadas.push(chamada.name);
+
+          if (
+            chamada.name === 'mover_estagio' &&
+            typeof chamada.arguments.estagio === 'string'
+          ) {
+            acoesExecutadas.push(`estagio:${chamada.arguments.estagio}`);
+          }
         } catch (error) {
           if (
             error instanceof BadRequestException ||
