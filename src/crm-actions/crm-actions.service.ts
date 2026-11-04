@@ -2,6 +2,7 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException, ConflictException, } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QualificationService } from '../qualification/qualification.service.js';
+import { Prisma } from '../generated/prisma/client.js';
 
 type TagPermitida =
   | 'qualificado'
@@ -21,8 +22,9 @@ export class CrmActionsService {
     tag: TagPermitida,
     expectedVersion: number,
     simulacao = false,
+    transacao?: Prisma.TransactionClient,
   ) {
-    const resultado = await this.prisma.$transaction(async (tx) => {
+    const resultado = await this.executarTransacao(transacao, async (tx) => {
       await this.validarVersaoDaConversa(
         tx,
         tenantId,
@@ -202,8 +204,9 @@ export class CrmActionsService {
     estagio: string,
     expectedVersion: number,
     simulacao = false,
+    transacao?: Prisma.TransactionClient,
   ) {
-    const resultado = await this.prisma.$transaction(async (tx) => {
+    const resultado = await this.executarTransacao(transacao, async (tx) => {
       await this.validarVersaoDaConversa(
         tx,
         tenantId,
@@ -445,8 +448,10 @@ export class CrmActionsService {
     conversaId: string,
     codigoHorario: string,
     expectedVersion: number,
+    simulacao = false,
+    transacao?: Prisma.TransactionClient,
   ) {
-    const resultado = await this.prisma.$transaction(async (tx) => {
+    const resultado = await this.executarTransacao(transacao, async (tx) => {
       await this.validarVersaoDaConversa(
         tx,
         tenantId,
@@ -484,6 +489,7 @@ export class CrmActionsService {
             parametros: { codigo_horario: codigoHorario },
             resultado: 'REJECTED_BY_POLICY',
             detalhes: motivo,
+            simulacao,
           },
         });
 
@@ -559,6 +565,41 @@ export class CrmActionsService {
         );
       }
 
+      if (simulacao) {
+        const horario = await tx.scheduleSlot.findFirst({
+          where: {
+            tenant_id: tenantId,
+            codigo_horario: codigoHorario,
+            disponivel: true,
+          },
+        });
+
+        if (!horario) {
+          return rejeitar(
+            'Horário não encontrado ou indisponível para este tenant.',
+          );
+        }
+
+        await tx.auditLog.create({
+          data: {
+            tenant_id: tenantId,
+            conversation_id: conversaId,
+            acao: 'marcar_agenda',
+            parametros: { codigo_horario: codigoHorario },
+            resultado: 'SUCCESS',
+            detalhes: `[SIMULACAO] O horário "${codigoHorario}" seria reservado. Nenhuma reserva foi realizada.`,
+            simulacao: true,
+          },
+        });
+
+        return {
+          sucesso: true,
+          simulacao: true,
+          codigo_horario: codigoHorario,
+          estagio_atual: 'Agendado',
+        };
+      }
+
       const reserva = await tx.scheduleSlot.updateMany({
         where: {
           tenant_id: tenantId,
@@ -591,7 +632,7 @@ export class CrmActionsService {
       });
 
       if (conversaAtualizada.count !== 1) {
-        throw new ForbiddenException(
+        throw new ConflictException(
           'O estado da conversa foi alterado durante o agendamento. A reserva foi cancelada.',
         );
       }
@@ -604,6 +645,7 @@ export class CrmActionsService {
           parametros: { codigo_horario: codigoHorario },
           resultado: 'SUCCESS',
           detalhes: `Horário "${codigoHorario}" reservado com sucesso.`,
+          simulacao: false,
         },
       });
 
@@ -621,8 +663,11 @@ export class CrmActionsService {
     return resultado;
   }
 
-  async consultarAgenda(tenantId: string) {
-    return this.prisma.$transaction(async (tx) => {
+  async consultarAgenda(
+    tenantId: string,
+    transacao?: Prisma.TransactionClient,
+  ) {
+    return this.executarTransacao(transacao, async (tx) => {
       const horarios = await tx.scheduleSlot.findMany({
         where: {
           tenant_id: tenantId,
@@ -659,8 +704,9 @@ export class CrmActionsService {
     resumo: string,
     expectedVersion: number,
     simulacao = false,
+    transacao?: Prisma.TransactionClient,
   ) {
-    const resultadoTransacao = await this.prisma.$transaction(async (tx) => {
+    const resultadoTransacao = await this.executarTransacao(transacao, async (tx) => {
       await this.validarVersaoDaConversa(
         tx,
         tenantId,
@@ -773,8 +819,10 @@ export class CrmActionsService {
     conversaId: string,
     motivo: string,
     expectedVersion: number,
+    simulacao = false,
+    transacao?: Prisma.TransactionClient,
   ) {
-    const resultadoTransacao = await this.prisma.$transaction(async (tx) => {
+    const resultadoTransacao = await this.executarTransacao(transacao, async (tx) => {
       await this.validarVersaoDaConversa(
         tx,
         tenantId,
@@ -811,6 +859,7 @@ export class CrmActionsService {
             parametros: { motivo },
             resultado: 'REJECTED_BY_POLICY',
             detalhes: motivoRejeicao,
+            simulacao,
           },
         });
 
@@ -851,6 +900,31 @@ export class CrmActionsService {
           ? [...tagsAtuais, 'cliente-antigo']
           : tagsAtuais;
 
+            if (simulacao) {
+        await tx.auditLog.create({
+          data: {
+            tenant_id: tenantId,
+            conversation_id: conversaId,
+            acao: 'transferir_humano',
+            parametros: { motivo: motivo.trim() },
+            resultado: 'SUCCESS',
+            simulacao: true,
+            detalhes: clienteAntigo
+              ? `[SIMULACAO] A conversa seria transferida para atendimento humano, com aplicação da tag cliente-antigo. Motivo: ${motivo.trim()}`
+              : `[SIMULACAO] A conversa seria transferida para atendimento humano. Motivo: ${motivo.trim()}`,
+          },
+        });
+
+        return {
+          sucesso: true,
+          simulacao: true,
+          estado: 'HUMANO_PENDENTE',
+          estagio_atual: 'Humano',
+          motivo_transferencia: motivo.trim(),
+          tags: novasTags,
+        };
+      }
+
       const atualizacao = await tx.conversation.updateMany({
         where: {
           id: conversaId,
@@ -870,10 +944,31 @@ export class CrmActionsService {
       });
 
       if (atualizacao.count !== 1) {
-        return rejeitar(
+        throw new ConflictException(
           'A conversa foi modificada durante a transferência. Tente novamente.',
         );
       }
+
+      await tx.auditLog.create({
+        data: {
+          tenant_id: tenantId,
+          conversation_id: conversaId,
+          acao: 'transferir_humano',
+          parametros: { motivo: motivo.trim() },
+          resultado: 'SUCCESS',
+          simulacao: false,
+          detalhes: clienteAntigo
+            ? `Conversa transferida para atendimento humano. Tag cliente-antigo aplicada. Motivo: ${motivo.trim()}`
+            : `Conversa transferida para atendimento humano. Motivo: ${motivo.trim()}`,
+        },
+      });
+
+      return {
+        sucesso: true,
+        estado: 'HUMANO_PENDENTE',
+        estagio_atual: 'Humano',
+        motivo_transferencia: motivo.trim(),
+      };
 
       await tx.auditLog.create({
         data: {
@@ -938,5 +1033,14 @@ export class CrmActionsService {
         'A conversa foi alterada ou assumida por um humano. A execução da ferramenta foi bloqueada.',
       );
     }
+  }
+
+  private executarTransacao<T>(
+    transacao: Prisma.TransactionClient | undefined,
+    callback: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return transacao
+      ? callback(transacao)
+      : this.prisma.$transaction(callback);
   }
 }

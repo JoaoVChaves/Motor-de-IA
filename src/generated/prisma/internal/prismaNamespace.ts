@@ -403,7 +403,9 @@ export const ModelName = {
   Message: 'Message',
   ScheduleSlot: 'ScheduleSlot',
   AuditLog: 'AuditLog',
-  TurnMetric: 'TurnMetric'
+  TurnMetric: 'TurnMetric',
+  TurnStep: 'TurnStep',
+  ToolExecution: 'ToolExecution'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -419,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "conversation" | "leadSheet" | "message" | "scheduleSlot" | "auditLog" | "turnMetric"
+    modelProps: "tenant" | "conversation" | "leadSheet" | "message" | "scheduleSlot" | "auditLog" | "turnMetric" | "turnStep" | "toolExecution"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -941,6 +943,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TurnStep: {
+      payload: Prisma.$TurnStepPayload<ExtArgs>
+      fields: Prisma.TurnStepFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TurnStepFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TurnStepPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TurnStepFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TurnStepPayload>
+        }
+        findFirst: {
+          args: Prisma.TurnStepFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TurnStepPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TurnStepFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TurnStepPayload>
+        }
+        findMany: {
+          args: Prisma.TurnStepFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TurnStepPayload>[]
+        }
+        create: {
+          args: Prisma.TurnStepCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TurnStepPayload>
+        }
+        createMany: {
+          args: Prisma.TurnStepCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TurnStepCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TurnStepPayload>[]
+        }
+        delete: {
+          args: Prisma.TurnStepDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TurnStepPayload>
+        }
+        update: {
+          args: Prisma.TurnStepUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TurnStepPayload>
+        }
+        deleteMany: {
+          args: Prisma.TurnStepDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TurnStepUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TurnStepUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TurnStepPayload>[]
+        }
+        upsert: {
+          args: Prisma.TurnStepUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TurnStepPayload>
+        }
+        aggregate: {
+          args: Prisma.TurnStepAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTurnStep>
+        }
+        groupBy: {
+          args: Prisma.TurnStepGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TurnStepGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TurnStepCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TurnStepCountAggregateOutputType> | number
+        }
+      }
+    }
+    ToolExecution: {
+      payload: Prisma.$ToolExecutionPayload<ExtArgs>
+      fields: Prisma.ToolExecutionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ToolExecutionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToolExecutionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ToolExecutionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToolExecutionPayload>
+        }
+        findFirst: {
+          args: Prisma.ToolExecutionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToolExecutionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ToolExecutionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToolExecutionPayload>
+        }
+        findMany: {
+          args: Prisma.ToolExecutionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToolExecutionPayload>[]
+        }
+        create: {
+          args: Prisma.ToolExecutionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToolExecutionPayload>
+        }
+        createMany: {
+          args: Prisma.ToolExecutionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ToolExecutionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToolExecutionPayload>[]
+        }
+        delete: {
+          args: Prisma.ToolExecutionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToolExecutionPayload>
+        }
+        update: {
+          args: Prisma.ToolExecutionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToolExecutionPayload>
+        }
+        deleteMany: {
+          args: Prisma.ToolExecutionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ToolExecutionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ToolExecutionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToolExecutionPayload>[]
+        }
+        upsert: {
+          args: Prisma.ToolExecutionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ToolExecutionPayload>
+        }
+        aggregate: {
+          args: Prisma.ToolExecutionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateToolExecution>
+        }
+        groupBy: {
+          args: Prisma.ToolExecutionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ToolExecutionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ToolExecutionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ToolExecutionCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1095,6 +1245,42 @@ export const TurnMetricScalarFieldEnum = {
 } as const
 
 export type TurnMetricScalarFieldEnum = (typeof TurnMetricScalarFieldEnum)[keyof typeof TurnMetricScalarFieldEnum]
+
+
+export const TurnStepScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  conversation_id: 'conversation_id',
+  turn_id: 'turn_id',
+  step_index: 'step_index',
+  provider: 'provider',
+  model: 'model',
+  content: 'content',
+  tool_calls: 'tool_calls',
+  prompt_tokens: 'prompt_tokens',
+  completion_tokens: 'completion_tokens',
+  estimated_cost_usd: 'estimated_cost_usd',
+  created_at: 'created_at'
+} as const
+
+export type TurnStepScalarFieldEnum = (typeof TurnStepScalarFieldEnum)[keyof typeof TurnStepScalarFieldEnum]
+
+
+export const ToolExecutionScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  conversation_id: 'conversation_id',
+  turn_id: 'turn_id',
+  step_index: 'step_index',
+  call_index: 'call_index',
+  tool_name: 'tool_name',
+  arguments: 'arguments',
+  result: 'result',
+  simulacao: 'simulacao',
+  created_at: 'created_at'
+} as const
+
+export type ToolExecutionScalarFieldEnum = (typeof ToolExecutionScalarFieldEnum)[keyof typeof ToolExecutionScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1483,6 +1669,8 @@ export type GlobalOmitConfig = {
   scheduleSlot?: Prisma.ScheduleSlotOmit
   auditLog?: Prisma.AuditLogOmit
   turnMetric?: Prisma.TurnMetricOmit
+  turnStep?: Prisma.TurnStepOmit
+  toolExecution?: Prisma.ToolExecutionOmit
 }
 
 /* Types for Logging */

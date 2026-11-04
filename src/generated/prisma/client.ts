@@ -76,3 +76,13 @@ export type AuditLog = Prisma.AuditLogModel
  * 
  */
 export type TurnMetric = Prisma.TurnMetricModel
+/**
+ * Model TurnStep
+ * 
+ */
+export type TurnStep = Prisma.TurnStepModel
+/**
+ * Model ToolExecution
+ * 
+ */
+export type ToolExecution = Prisma.ToolExecutionModel

@@ -1,5 +1,5 @@
 
-import { ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException, BadRequestException, ConflictException, } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CrmActionsService } from './crm-actions.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -1362,7 +1362,7 @@ describe('CrmActionsService', () => {
           'conversa-1',
           'quinta-09',
           1),
-      ).rejects.toThrow(ForbiddenException);
+      ).rejects.toThrow(ConflictException);
 
       expect(txMock.scheduleSlot.updateMany).toHaveBeenCalled();
       expect(txMock.auditLog.create).not.toHaveBeenCalled();
@@ -1854,14 +1854,9 @@ describe('CrmActionsService', () => {
           'conversa-1',
           'Solicitação do cliente.',
           1),
-      ).rejects.toThrow(ForbiddenException);
+      ).rejects.toThrow(ConflictException);
 
-      expect(txMock.auditLog.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          resultado: 'REJECTED_BY_POLICY',
-          detalhes: expect.stringContaining('modificada'),
-        }),
-      });
+      expect(txMock.auditLog.create).not.toHaveBeenCalled();
     });
 
     it('deve rejeitar conversa inexistente ou de outro tenant', async () => {

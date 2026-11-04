@@ -1,11 +1,36 @@
 
-import { BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 
 import { ToolExecutorService } from './tool-executor.service.js';
 import { CrmService } from '../crm/crm.service.js';
 import { CrmActionsService } from '../crm-actions/crm-actions.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+
+let persistedToolExecution: any = null;
+
+const prismaMock = {
+  toolExecution: {
+    findUnique: jest.fn(async (_args: any): Promise<any> => {
+      return persistedToolExecution;
+    }),
+    create: jest.fn(async (args: any): Promise<any> => {
+      persistedToolExecution = {
+        ...args.data,
+      };
+
+      return persistedToolExecution;
+    }),
+  },
+  $transaction: jest.fn(async (callback: any) =>
+    callback(prismaMock),
+  ),
+};
 
 describe('ToolExecutorService', () => {
   let service: ToolExecutorService;
@@ -27,14 +52,22 @@ describe('ToolExecutorService', () => {
     tenantId: 'sol-nascente',
     conversaId: 'conversa-1',
     expectedVersion: 2,
+    turnId: '550e8400-e29b-41d4-a716-446655440000',
+    stepIndex: 0,
+    callIndex: 0,
   };
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    persistedToolExecution = null;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ToolExecutorService,
+        {
+          provide: PrismaService,
+          useValue: prismaMock,
+        },
         {
           provide: CrmService,
           useValue: crmServiceMock,
@@ -71,6 +104,9 @@ describe('ToolExecutorService', () => {
       'sol-nascente',
       'conversa-1',
       { nome: 'João' },
+      2, 
+      false,
+      prismaMock,
     );
 
     expect(resultado).toEqual({
@@ -95,6 +131,9 @@ describe('ToolExecutorService', () => {
       'sol-nascente',
       'conversa-1',
       { valorConta: 250.5 },
+      2,
+      false,
+      prismaMock,
     );
   });
 
@@ -113,7 +152,9 @@ describe('ToolExecutorService', () => {
       'sol-nascente',
       'conversa-1',
       'qualificado',
+      2,
       false,
+      prismaMock,
     );
   });
 
@@ -132,7 +173,9 @@ describe('ToolExecutorService', () => {
       'sol-nascente',
       'conversa-1',
       'Qualificado',
+      2,
       false,
+      prismaMock,
     );
   });
 
@@ -149,6 +192,7 @@ describe('ToolExecutorService', () => {
 
     expect(crmActionsServiceMock.consultarAgenda).toHaveBeenCalledWith(
       'sol-nascente',
+      prismaMock,
     );
   });
 
@@ -167,6 +211,9 @@ describe('ToolExecutorService', () => {
       'sol-nascente',
       'conversa-1',
       'quinta-09',
+      2,
+      false,
+      prismaMock,
     );
   });
 
@@ -185,7 +232,9 @@ describe('ToolExecutorService', () => {
       'sol-nascente',
       'conversa-1',
       'Lead interessado em energia solar.',
+      2,
       false,
+      prismaMock,
     );
   });
 
@@ -204,6 +253,9 @@ describe('ToolExecutorService', () => {
       'sol-nascente',
       'conversa-1',
       'Cliente solicitou atendimento humano.',
+      2,
+      false,
+      prismaMock,
     );
   });
 
@@ -318,11 +370,7 @@ describe('ToolExecutorService', () => {
       service.executar(
         'consultar_agenda',
         {},
-        {
-          tenantId: '',
-          conversaId: 'conversa-1',
-          expectedVersion: 2,
-        },
+        { ...contexto, tenantId: '' }
       ),
     ).rejects.toThrow(BadRequestException);
   });
@@ -332,11 +380,7 @@ describe('ToolExecutorService', () => {
       service.executar(
         'consultar_agenda',
         {},
-        {
-          tenantId: 'sol-nascente',
-          conversaId: '',
-          expectedVersion: 2,
-        },
+        { ...contexto, conversaId: '' },
       ),
     ).rejects.toThrow(BadRequestException);
   });
@@ -365,5 +409,158 @@ describe('ToolExecutorService', () => {
         },
       ),
     ).rejects.toThrow(BadRequestException);
+  });
+
+  it('deve rejeitar contexto sem turnId', async () => {
+    await expect(
+      service.executar(
+        'consultar_agenda',
+        {},
+        { ...contexto, turnId: '' },
+      ),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('deve rejeitar stepIndex negativo', async () => {
+    await expect(
+      service.executar(
+        'consultar_agenda',
+        {},
+        { ...contexto, stepIndex: -1 },
+      ),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('deve rejeitar callIndex negativo', async () => {
+    await expect(
+      service.executar(
+        'consultar_agenda',
+        {},
+        { ...contexto, callIndex: -1 },
+      ),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  
+  it('deve retornar o resultado salvo sem executar novamente a ferramenta', async () => {
+    crmActionsServiceMock.adicionarTag.mockResolvedValue({
+      tags: ['qualificado'],
+    });
+
+    const primeiraExecucao = await service.executar(
+      'adicionar_tag',
+      { tag: 'qualificado' },
+      contexto,
+    );
+
+    const segundaExecucao = await service.executar(
+      'adicionar_tag',
+      { tag: 'qualificado' },
+      contexto,
+    );
+
+    expect(segundaExecucao).toEqual(primeiraExecucao);
+    expect(crmActionsServiceMock.adicionarTag).toHaveBeenCalledTimes(1);
+    expect(prismaMock.toolExecution.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('deve rejeitar a reutilização da chave com argumentos diferentes', async () => {
+    crmActionsServiceMock.adicionarTag.mockResolvedValue({
+      tags: ['qualificado'],
+    });
+
+    await service.executar(
+      'adicionar_tag',
+      { tag: 'qualificado' },
+      contexto,
+    );
+
+    await expect(
+      service.executar(
+        'adicionar_tag',
+        { tag: 'desqualificado' },
+        contexto,
+      ),
+    ).rejects.toThrow(ConflictException);
+
+    expect(crmActionsServiceMock.adicionarTag).toHaveBeenCalledTimes(1);
+    expect(prismaMock.toolExecution.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('deve persistir e reproduzir uma rejeição de política sem executar novamente', async () => {
+    crmActionsServiceMock.adicionarTag.mockRejectedValue(
+      new ForbiddenException('Tag não permitida pela política.'),
+    );
+
+    await expect(
+      service.executar(
+        'adicionar_tag',
+        { tag: 'qualificado' },
+        contexto,
+      ),
+    ).rejects.toThrow(ForbiddenException);
+
+    expect(prismaMock.toolExecution.create).toHaveBeenCalledTimes(1);
+
+    await expect(
+      service.executar(
+        'adicionar_tag',
+        { tag: 'qualificado' },
+        contexto,
+      ),
+    ).rejects.toThrow('Tag não permitida pela política.');
+
+    expect(crmActionsServiceMock.adicionarTag).toHaveBeenCalledTimes(1);
+    expect(prismaMock.toolExecution.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('não deve persistir ConflictException como resultado definitivo', async () => {
+    crmActionsServiceMock.adicionarTag.mockRejectedValue(
+      new ConflictException('A conversa foi modificada.'),
+    );
+
+    await expect(
+      service.executar(
+        'adicionar_tag',
+        { tag: 'qualificado' },
+        contexto,
+      ),
+    ).rejects.toThrow(ConflictException);
+
+    expect(prismaMock.toolExecution.create).not.toHaveBeenCalled();
+    expect(persistedToolExecution).toBeNull();
+  });
+
+  it('deve recuperar o resultado vencedor quando ocorrer conflito de chave única', async () => {
+    const resultadoVencedor = {
+      sucesso: true,
+      dados: { tags: ['qualificado'] },
+    };
+
+    prismaMock.toolExecution.create.mockImplementationOnce(
+      async (args: any) => {
+        persistedToolExecution = {
+          ...args.data,
+          result: resultadoVencedor,
+        };
+
+        throw Object.assign(new Error('Unique constraint failed'), {
+          code: 'P2002',
+        });
+      },
+    );
+
+    crmActionsServiceMock.adicionarTag.mockResolvedValue({
+      tags: ['qualificado'],
+    });
+
+    const resultado = await service.executar(
+      'adicionar_tag',
+      { tag: 'qualificado' },
+      contexto,
+    );
+
+    expect(resultado).toEqual(resultadoVencedor);
+    expect(prismaMock.toolExecution.create).toHaveBeenCalledTimes(1);
   });
 });

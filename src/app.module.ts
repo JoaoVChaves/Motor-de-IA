@@ -29,6 +29,27 @@ import { QueueModule } from './queue/queue.module.js';
         REDIS_HOST: Joi.string().default('localhost'),
 
         REDIS_PORT: Joi.number().default(6379),
+
+        LLM_PROVIDER: Joi.string()
+          .valid('mock', 'gemini')
+          .default('mock'),
+
+        GEMINI_API_KEY: Joi.when('LLM_PROVIDER', {
+          is: 'gemini',
+          then: Joi.string().min(1).required(),
+          otherwise: Joi.string().allow('').optional(),
+        }),
+
+        GEMINI_MODEL: Joi.when('LLM_PROVIDER', {
+          is: 'gemini',
+          then: Joi.string().min(1).required(),
+          otherwise: Joi.string().allow('').optional(),
+        }),
+
+        LLM_TIMEOUT_MS: Joi.number()
+          .integer()
+          .positive()
+          .default(30000),
       }),
     }),
     ScheduleModule.forRoot(),

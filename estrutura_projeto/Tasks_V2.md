@@ -258,50 +258,50 @@ intervenção humana e agrupar rajadas na janela de oito segundos.*
 
 ### 3.5. Fila BullMQ e Janela Antirrajada de 8s (`QueueModule`)
 
--   [ ] Configurar fila `message-batch-queue`.
--   [ ] Implementar debounce por `(tenantId, conversaId)`:
+-   [x] Configurar fila `message-batch-queue`.
+-   [x] Implementar debounce por `(tenantId, conversaId)`:
     -   Nova mensagem durante o período de espera deve reagendar a
         execução para oito segundos após a mensagem mais recente.
     -   Usar identificadores determinísticos de jobs e definir
         claramente a remoção/recriação ou alteração do delay.
--   [ ] Tratar mensagens que chegam enquanto um job já está em execução:
+-   [x] Tratar mensagens que chegam enquanto um job já está em execução:
     -   Não tentar alterar um job ativo como se ainda estivesse em
         `delayed`.
     -   Garantir que as mensagens novas sejam processadas em um próximo
         turno.
     -   Garantir que exista no máximo um próximo processamento agendado
         por conversa.
--   [ ] Implementar controle de concorrência por conversa.
--   [ ] Usar o PostgreSQL como garantia principal de consistência
+-   [x] Implementar controle de concorrência por conversa.
+-   [x] Usar o PostgreSQL como garantia principal de consistência
     (estado/versão/atualização condicional); o lock Redis pode atuar
     como proteção adicional.
--   [ ] Definir renovação/expiração segura do lock para processamentos
+-   [x] Definir renovação/expiração segura do lock para processamentos
     que ultrapassem o TTL.
--   [ ] Antes de executar ferramentas com efeitos colaterais e antes de
+-   [x] Antes de executar ferramentas com efeitos colaterais e antes de
     salvar/enviar a resposta, revalidar estado e versão da conversa.
--   [ ] Definir política para `simulacao` em lotes com mensagens
+-   [x] Definir política para `simulacao` em lotes com mensagens
     diferentes. Política recomendada: se qualquer mensagem do lote for
     simulada, tratar o turno inteiro como simulado e registrar essa
     decisão na auditoria.
--   [ ] Implementar recuperação/reconciliação: identificar mensagens
+-   [x] Implementar recuperação/reconciliação: identificar mensagens
     pendentes sem job ativo e reagendar o processamento.
--   [ ] Configurar tentativas e backoff do BullMQ, garantindo que uma
+-   [x] Configurar tentativas e backoff do BullMQ, garantindo que uma
     nova tentativa consiga retomar após falha sem ficar bloqueada pelo
     estado `PROCESSANDO`.
--   [ ] Garantir que mensagens já processadas não sejam executadas
+-   [x] Garantir que mensagens já processadas não sejam executadas
     novamente em caso de retry.
 
 ### Entrega da Fase 3
 
--   [ ] Mensagem duplicada não gera segundo registro nem segundo efeito.
--   [ ] Três mensagens recebidas em sequência dentro da janela geram um
+-   [x] Mensagem duplicada não gera segundo registro nem segundo efeito.
+-   [x] Três mensagens recebidas em sequência dentro da janela geram um
     único turno.
--   [ ] Mensagem recebida durante processamento é tratada em um próximo
+-   [x] Mensagem recebida durante processamento é tratada em um próximo
     turno.
--   [ ] Intervenção humana impede novas ações/respostas da IA.
--   [ ] Falha do worker permite retry ou recuperação sem deixar a
+-   [x] Intervenção humana impede novas ações/respostas da IA.
+-   [x] Falha do worker permite retry ou recuperação sem deixar a
     conversa presa.
--   [ ] Mensagens persistidas podem ser recuperadas mesmo se um job
+-   [x] Mensagens persistidas podem ser recuperadas mesmo se um job
     Redis for perdido.
 
 ------------------------------------------------------------------------
@@ -313,11 +313,11 @@ LLM às regras determinísticas já testadas.*
 
 ### 4.1. Abstração do Provedor de LLM (`LlmModule`)
 
--   [ ] Consolidar interface `ILlmAdapter` e provider token
+-   [x] Consolidar interface `ILlmAdapter` e provider token
     `LLM_ADAPTER`.
--   [ ] Configurar factory no `LlmModule`, alternando entre
+-   [x] Configurar factory no `LlmModule`, alternando entre
     `GeminiAdapter` e `MockLlmAdapter` via `LLM_PROVIDER`.
--   [ ] Garantir que o restante da aplicação dependa da interface, não
+-   [x] Garantir que o restante da aplicação dependa da interface, não
     do SDK específico do Gemini.
 
 ### 4.2. Implementação do `GeminiAdapter` (`@google/genai`)

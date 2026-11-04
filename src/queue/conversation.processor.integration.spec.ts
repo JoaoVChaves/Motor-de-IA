@@ -3,7 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import { getQueueToken } from '@nestjs/bullmq';
 import { Queue, QueueEvents } from 'bullmq';
-
+import { LLM_PROVIDER } from '../llm/llm.module.js';
+import { MockLlmAdapter } from '../llm/adapters/mock-llm.adapter.js';
 import { QueueModule } from './queue.module.js';
 import { CONVERSATION_QUEUE } from './queue.constants.js';
 import { PrismaModule } from '../prisma/prisma.module.js';

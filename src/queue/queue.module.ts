@@ -1,14 +1,24 @@
+
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
+
 import { CONVERSATION_QUEUE } from './queue.constants.js';
 import { ConversationQueueService } from './conversation-queue.service.js';
 import { ConversationProcessor } from './conversation.processor.js';
 import { RedisLockService } from './redis-lock.service.js';
 import { ConversationReconciliationService } from './conversation-reconciliation.service.js';
 
+import { LlmModule } from '../llm/llm.module.js';
+import { ToolExecutorModule } from '../tool-executor/tool-executor.module.js';
+import { TenantsModule } from '../tenants/tenants.module.js';
+
 @Module({
   imports: [
+    LlmModule,
+    ToolExecutorModule,
+    TenantsModule,
+
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -32,7 +42,16 @@ import { ConversationReconciliationService } from './conversation-reconciliation
       },
     }),
   ],
-  providers: [ConversationQueueService,ConversationProcessor, RedisLockService, ConversationReconciliationService,],
-  exports: [BullModule, ConversationQueueService,RedisLockService],
+  providers: [
+    ConversationQueueService,
+    ConversationProcessor,
+    RedisLockService,
+    ConversationReconciliationService,
+  ],
+  exports: [
+    BullModule,
+    ConversationQueueService,
+    RedisLockService,
+  ],
 })
 export class QueueModule {}

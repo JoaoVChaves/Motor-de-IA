@@ -8,7 +8,7 @@ export type QualificationStatus =
   | 'DESQUALIFICADO_CIDADE'
   | 'TRANSFERIR_HUMANO';
 
-interface FichaLead {
+export interface FichaLead {
   posse_imovel: 'PROPRIO' | 'ALUGADO' | null;
   tipo_imovel: 'CASA' | 'APARTAMENTO' | null;
   valor_conta: number | { toNumber(): number } | null;

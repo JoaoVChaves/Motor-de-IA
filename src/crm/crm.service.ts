@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException, ConflictException, } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QualificationService } from '../qualification/qualification.service.js';
+import { Prisma } from '../generated/prisma/client.js';
 
 interface DadosExtraidos {
   nome?: unknown;
@@ -24,6 +25,8 @@ export class CrmService {
     conversaId: string,
     dadosExtraidos: DadosExtraidos,
     expectedVersion: number,
+    simulacao = false,
+    transacao?: Prisma.TransactionClient,
   ) {
     const dadosValidos: Record<string, unknown> = {};
 
@@ -131,7 +134,7 @@ export class CrmService {
       );
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    return this.executarTransacao(transacao, async (tx) => {
       const conversa = await tx.$queryRaw<
         { id: string; estado: string; version: number }[]
       >`
@@ -157,17 +160,6 @@ export class CrmService {
         );
       }
 
-      const ficha = await tx.leadSheet.upsert({
-        where: {
-          conversation_id: conversaId,
-        },
-        update: dadosValidos,
-        create: {
-          conversation_id: conversaId,
-          ...dadosValidos,
-        },
-      });
-
       const tenant = await tx.tenant.findUnique({
         where: {
           id: tenantId,
@@ -181,6 +173,55 @@ export class CrmService {
         throw new NotFoundException('Tenant não encontrado.');
       }
 
+      if (simulacao) {
+        const fichaAtual = await tx.leadSheet.findUnique({
+          where: {
+            conversation_id: conversaId,
+          },
+        });
+
+        const fichaBase = fichaAtual ?? {
+          id: '',
+          conversation_id: conversaId,
+          nome: null,
+          cidade: null,
+          tipo_imovel: null,
+          posse_imovel: null,
+          valor_conta: null,
+          forma_pagamento: null,
+          is_cliente_antigo: null,
+          situacao_especial: null,
+          dados_extras: null,
+          updated_at: new Date(),
+        };
+
+        const fichaSimulada = {
+          ...fichaBase,
+          ...dadosValidos,
+        } as Parameters<QualificationService['avaliar']>[0];
+
+        const qualificacao = this.qualificationService.avaliar(
+          fichaSimulada,
+          tenant,
+        );
+
+        return {
+          ficha: fichaSimulada,
+          qualificacao,
+        };
+      }
+
+      const ficha = await tx.leadSheet.upsert({
+        where: {
+          conversation_id: conversaId,
+        },
+        update: dadosValidos,
+        create: {
+          conversation_id: conversaId,
+          ...dadosValidos,
+        },
+      });
+
       const qualificacao = this.qualificationService.avaliar(
         ficha,
         tenant,
@@ -191,5 +232,14 @@ export class CrmService {
         qualificacao,
       };
     });
+  }
+
+  private executarTransacao<T>(
+    transacao: Prisma.TransactionClient | undefined,
+    callback: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return transacao
+      ? callback(transacao)
+      : this.prisma.$transaction(callback);
   }
 }

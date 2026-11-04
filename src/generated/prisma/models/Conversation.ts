@@ -257,6 +257,8 @@ export type ConversationWhereInput = {
   messages?: Prisma.MessageListRelationFilter
   turn_metrics?: Prisma.TurnMetricListRelationFilter
   audit_logs?: Prisma.AuditLogListRelationFilter
+  turn_steps?: Prisma.TurnStepListRelationFilter
+  tool_executions?: Prisma.ToolExecutionListRelationFilter
   booked_slots?: Prisma.ScheduleSlotListRelationFilter
 }
 
@@ -276,6 +278,8 @@ export type ConversationOrderByWithRelationInput = {
   messages?: Prisma.MessageOrderByRelationAggregateInput
   turn_metrics?: Prisma.TurnMetricOrderByRelationAggregateInput
   audit_logs?: Prisma.AuditLogOrderByRelationAggregateInput
+  turn_steps?: Prisma.TurnStepOrderByRelationAggregateInput
+  tool_executions?: Prisma.ToolExecutionOrderByRelationAggregateInput
   booked_slots?: Prisma.ScheduleSlotOrderByRelationAggregateInput
 }
 
@@ -300,6 +304,8 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   messages?: Prisma.MessageListRelationFilter
   turn_metrics?: Prisma.TurnMetricListRelationFilter
   audit_logs?: Prisma.AuditLogListRelationFilter
+  turn_steps?: Prisma.TurnStepListRelationFilter
+  tool_executions?: Prisma.ToolExecutionListRelationFilter
   booked_slots?: Prisma.ScheduleSlotListRelationFilter
 }, "id" | "id_tenant_id" | "tenant_id_telefone">
 
@@ -352,6 +358,8 @@ export type ConversationCreateInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   turn_metrics?: Prisma.TurnMetricCreateNestedManyWithoutConversationInput
   audit_logs?: Prisma.AuditLogCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionCreateNestedManyWithoutConversationInput
   booked_slots?: Prisma.ScheduleSlotCreateNestedManyWithoutBooked_conversationInput
 }
 
@@ -370,6 +378,8 @@ export type ConversationUncheckedCreateInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   turn_metrics?: Prisma.TurnMetricUncheckedCreateNestedManyWithoutConversationInput
   audit_logs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepUncheckedCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionUncheckedCreateNestedManyWithoutConversationInput
   booked_slots?: Prisma.ScheduleSlotUncheckedCreateNestedManyWithoutBooked_conversationInput
 }
 
@@ -388,6 +398,8 @@ export type ConversationUpdateInput = {
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   turn_metrics?: Prisma.TurnMetricUpdateManyWithoutConversationNestedInput
   audit_logs?: Prisma.AuditLogUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUpdateManyWithoutConversationNestedInput
   booked_slots?: Prisma.ScheduleSlotUpdateManyWithoutBooked_conversationNestedInput
 }
 
@@ -406,6 +418,8 @@ export type ConversationUncheckedUpdateInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   turn_metrics?: Prisma.TurnMetricUncheckedUpdateManyWithoutConversationNestedInput
   audit_logs?: Prisma.AuditLogUncheckedUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUncheckedUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUncheckedUpdateManyWithoutConversationNestedInput
   booked_slots?: Prisma.ScheduleSlotUncheckedUpdateManyWithoutBooked_conversationNestedInput
 }
 
@@ -654,6 +668,34 @@ export type ConversationUpdateOneRequiredWithoutTurn_metricsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ConversationUpdateToOneWithWhereWithoutTurn_metricsInput, Prisma.ConversationUpdateWithoutTurn_metricsInput>, Prisma.ConversationUncheckedUpdateWithoutTurn_metricsInput>
 }
 
+export type ConversationCreateNestedOneWithoutTurn_stepsInput = {
+  create?: Prisma.XOR<Prisma.ConversationCreateWithoutTurn_stepsInput, Prisma.ConversationUncheckedCreateWithoutTurn_stepsInput>
+  connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutTurn_stepsInput
+  connect?: Prisma.ConversationWhereUniqueInput
+}
+
+export type ConversationUpdateOneRequiredWithoutTurn_stepsNestedInput = {
+  create?: Prisma.XOR<Prisma.ConversationCreateWithoutTurn_stepsInput, Prisma.ConversationUncheckedCreateWithoutTurn_stepsInput>
+  connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutTurn_stepsInput
+  upsert?: Prisma.ConversationUpsertWithoutTurn_stepsInput
+  connect?: Prisma.ConversationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConversationUpdateToOneWithWhereWithoutTurn_stepsInput, Prisma.ConversationUpdateWithoutTurn_stepsInput>, Prisma.ConversationUncheckedUpdateWithoutTurn_stepsInput>
+}
+
+export type ConversationCreateNestedOneWithoutTool_executionsInput = {
+  create?: Prisma.XOR<Prisma.ConversationCreateWithoutTool_executionsInput, Prisma.ConversationUncheckedCreateWithoutTool_executionsInput>
+  connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutTool_executionsInput
+  connect?: Prisma.ConversationWhereUniqueInput
+}
+
+export type ConversationUpdateOneRequiredWithoutTool_executionsNestedInput = {
+  create?: Prisma.XOR<Prisma.ConversationCreateWithoutTool_executionsInput, Prisma.ConversationUncheckedCreateWithoutTool_executionsInput>
+  connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutTool_executionsInput
+  upsert?: Prisma.ConversationUpsertWithoutTool_executionsInput
+  connect?: Prisma.ConversationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConversationUpdateToOneWithWhereWithoutTool_executionsInput, Prisma.ConversationUpdateWithoutTool_executionsInput>, Prisma.ConversationUncheckedUpdateWithoutTool_executionsInput>
+}
+
 export type ConversationCreateWithoutTenantInput = {
   id?: string
   telefone: string
@@ -668,6 +710,8 @@ export type ConversationCreateWithoutTenantInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   turn_metrics?: Prisma.TurnMetricCreateNestedManyWithoutConversationInput
   audit_logs?: Prisma.AuditLogCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionCreateNestedManyWithoutConversationInput
   booked_slots?: Prisma.ScheduleSlotCreateNestedManyWithoutBooked_conversationInput
 }
 
@@ -685,6 +729,8 @@ export type ConversationUncheckedCreateWithoutTenantInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   turn_metrics?: Prisma.TurnMetricUncheckedCreateNestedManyWithoutConversationInput
   audit_logs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepUncheckedCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionUncheckedCreateNestedManyWithoutConversationInput
   booked_slots?: Prisma.ScheduleSlotUncheckedCreateNestedManyWithoutBooked_conversationInput
 }
 
@@ -744,6 +790,8 @@ export type ConversationCreateWithoutLead_sheetInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   turn_metrics?: Prisma.TurnMetricCreateNestedManyWithoutConversationInput
   audit_logs?: Prisma.AuditLogCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionCreateNestedManyWithoutConversationInput
   booked_slots?: Prisma.ScheduleSlotCreateNestedManyWithoutBooked_conversationInput
 }
 
@@ -761,6 +809,8 @@ export type ConversationUncheckedCreateWithoutLead_sheetInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   turn_metrics?: Prisma.TurnMetricUncheckedCreateNestedManyWithoutConversationInput
   audit_logs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepUncheckedCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionUncheckedCreateNestedManyWithoutConversationInput
   booked_slots?: Prisma.ScheduleSlotUncheckedCreateNestedManyWithoutBooked_conversationInput
 }
 
@@ -794,6 +844,8 @@ export type ConversationUpdateWithoutLead_sheetInput = {
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   turn_metrics?: Prisma.TurnMetricUpdateManyWithoutConversationNestedInput
   audit_logs?: Prisma.AuditLogUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUpdateManyWithoutConversationNestedInput
   booked_slots?: Prisma.ScheduleSlotUpdateManyWithoutBooked_conversationNestedInput
 }
 
@@ -811,6 +863,8 @@ export type ConversationUncheckedUpdateWithoutLead_sheetInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   turn_metrics?: Prisma.TurnMetricUncheckedUpdateManyWithoutConversationNestedInput
   audit_logs?: Prisma.AuditLogUncheckedUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUncheckedUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUncheckedUpdateManyWithoutConversationNestedInput
   booked_slots?: Prisma.ScheduleSlotUncheckedUpdateManyWithoutBooked_conversationNestedInput
 }
 
@@ -828,6 +882,8 @@ export type ConversationCreateWithoutMessagesInput = {
   lead_sheet?: Prisma.LeadSheetCreateNestedOneWithoutConversationInput
   turn_metrics?: Prisma.TurnMetricCreateNestedManyWithoutConversationInput
   audit_logs?: Prisma.AuditLogCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionCreateNestedManyWithoutConversationInput
   booked_slots?: Prisma.ScheduleSlotCreateNestedManyWithoutBooked_conversationInput
 }
 
@@ -845,6 +901,8 @@ export type ConversationUncheckedCreateWithoutMessagesInput = {
   lead_sheet?: Prisma.LeadSheetUncheckedCreateNestedOneWithoutConversationInput
   turn_metrics?: Prisma.TurnMetricUncheckedCreateNestedManyWithoutConversationInput
   audit_logs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepUncheckedCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionUncheckedCreateNestedManyWithoutConversationInput
   booked_slots?: Prisma.ScheduleSlotUncheckedCreateNestedManyWithoutBooked_conversationInput
 }
 
@@ -878,6 +936,8 @@ export type ConversationUpdateWithoutMessagesInput = {
   lead_sheet?: Prisma.LeadSheetUpdateOneWithoutConversationNestedInput
   turn_metrics?: Prisma.TurnMetricUpdateManyWithoutConversationNestedInput
   audit_logs?: Prisma.AuditLogUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUpdateManyWithoutConversationNestedInput
   booked_slots?: Prisma.ScheduleSlotUpdateManyWithoutBooked_conversationNestedInput
 }
 
@@ -895,6 +955,8 @@ export type ConversationUncheckedUpdateWithoutMessagesInput = {
   lead_sheet?: Prisma.LeadSheetUncheckedUpdateOneWithoutConversationNestedInput
   turn_metrics?: Prisma.TurnMetricUncheckedUpdateManyWithoutConversationNestedInput
   audit_logs?: Prisma.AuditLogUncheckedUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUncheckedUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUncheckedUpdateManyWithoutConversationNestedInput
   booked_slots?: Prisma.ScheduleSlotUncheckedUpdateManyWithoutBooked_conversationNestedInput
 }
 
@@ -913,6 +975,8 @@ export type ConversationCreateWithoutBooked_slotsInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   turn_metrics?: Prisma.TurnMetricCreateNestedManyWithoutConversationInput
   audit_logs?: Prisma.AuditLogCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateWithoutBooked_slotsInput = {
@@ -930,6 +994,8 @@ export type ConversationUncheckedCreateWithoutBooked_slotsInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   turn_metrics?: Prisma.TurnMetricUncheckedCreateNestedManyWithoutConversationInput
   audit_logs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepUncheckedCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationCreateOrConnectWithoutBooked_slotsInput = {
@@ -963,6 +1029,8 @@ export type ConversationUpdateWithoutBooked_slotsInput = {
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   turn_metrics?: Prisma.TurnMetricUpdateManyWithoutConversationNestedInput
   audit_logs?: Prisma.AuditLogUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateWithoutBooked_slotsInput = {
@@ -980,6 +1048,8 @@ export type ConversationUncheckedUpdateWithoutBooked_slotsInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   turn_metrics?: Prisma.TurnMetricUncheckedUpdateManyWithoutConversationNestedInput
   audit_logs?: Prisma.AuditLogUncheckedUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUncheckedUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationCreateWithoutAudit_logsInput = {
@@ -996,6 +1066,8 @@ export type ConversationCreateWithoutAudit_logsInput = {
   lead_sheet?: Prisma.LeadSheetCreateNestedOneWithoutConversationInput
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   turn_metrics?: Prisma.TurnMetricCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionCreateNestedManyWithoutConversationInput
   booked_slots?: Prisma.ScheduleSlotCreateNestedManyWithoutBooked_conversationInput
 }
 
@@ -1013,6 +1085,8 @@ export type ConversationUncheckedCreateWithoutAudit_logsInput = {
   lead_sheet?: Prisma.LeadSheetUncheckedCreateNestedOneWithoutConversationInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   turn_metrics?: Prisma.TurnMetricUncheckedCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepUncheckedCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionUncheckedCreateNestedManyWithoutConversationInput
   booked_slots?: Prisma.ScheduleSlotUncheckedCreateNestedManyWithoutBooked_conversationInput
 }
 
@@ -1046,6 +1120,8 @@ export type ConversationUpdateWithoutAudit_logsInput = {
   lead_sheet?: Prisma.LeadSheetUpdateOneWithoutConversationNestedInput
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   turn_metrics?: Prisma.TurnMetricUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUpdateManyWithoutConversationNestedInput
   booked_slots?: Prisma.ScheduleSlotUpdateManyWithoutBooked_conversationNestedInput
 }
 
@@ -1063,6 +1139,8 @@ export type ConversationUncheckedUpdateWithoutAudit_logsInput = {
   lead_sheet?: Prisma.LeadSheetUncheckedUpdateOneWithoutConversationNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   turn_metrics?: Prisma.TurnMetricUncheckedUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUncheckedUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUncheckedUpdateManyWithoutConversationNestedInput
   booked_slots?: Prisma.ScheduleSlotUncheckedUpdateManyWithoutBooked_conversationNestedInput
 }
 
@@ -1080,6 +1158,8 @@ export type ConversationCreateWithoutTurn_metricsInput = {
   lead_sheet?: Prisma.LeadSheetCreateNestedOneWithoutConversationInput
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   audit_logs?: Prisma.AuditLogCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionCreateNestedManyWithoutConversationInput
   booked_slots?: Prisma.ScheduleSlotCreateNestedManyWithoutBooked_conversationInput
 }
 
@@ -1097,6 +1177,8 @@ export type ConversationUncheckedCreateWithoutTurn_metricsInput = {
   lead_sheet?: Prisma.LeadSheetUncheckedCreateNestedOneWithoutConversationInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   audit_logs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepUncheckedCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionUncheckedCreateNestedManyWithoutConversationInput
   booked_slots?: Prisma.ScheduleSlotUncheckedCreateNestedManyWithoutBooked_conversationInput
 }
 
@@ -1130,6 +1212,8 @@ export type ConversationUpdateWithoutTurn_metricsInput = {
   lead_sheet?: Prisma.LeadSheetUpdateOneWithoutConversationNestedInput
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   audit_logs?: Prisma.AuditLogUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUpdateManyWithoutConversationNestedInput
   booked_slots?: Prisma.ScheduleSlotUpdateManyWithoutBooked_conversationNestedInput
 }
 
@@ -1147,6 +1231,192 @@ export type ConversationUncheckedUpdateWithoutTurn_metricsInput = {
   lead_sheet?: Prisma.LeadSheetUncheckedUpdateOneWithoutConversationNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   audit_logs?: Prisma.AuditLogUncheckedUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUncheckedUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUncheckedUpdateManyWithoutConversationNestedInput
+  booked_slots?: Prisma.ScheduleSlotUncheckedUpdateManyWithoutBooked_conversationNestedInput
+}
+
+export type ConversationCreateWithoutTurn_stepsInput = {
+  id?: string
+  telefone: string
+  estado?: $Enums.EstadoConversa
+  estagio_atual?: string
+  tags?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  motivo_transferencia?: string | null
+  version?: number
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutConversasInput
+  lead_sheet?: Prisma.LeadSheetCreateNestedOneWithoutConversationInput
+  messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
+  turn_metrics?: Prisma.TurnMetricCreateNestedManyWithoutConversationInput
+  audit_logs?: Prisma.AuditLogCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionCreateNestedManyWithoutConversationInput
+  booked_slots?: Prisma.ScheduleSlotCreateNestedManyWithoutBooked_conversationInput
+}
+
+export type ConversationUncheckedCreateWithoutTurn_stepsInput = {
+  id?: string
+  tenant_id: string
+  telefone: string
+  estado?: $Enums.EstadoConversa
+  estagio_atual?: string
+  tags?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  motivo_transferencia?: string | null
+  version?: number
+  created_at?: Date | string
+  updated_at?: Date | string
+  lead_sheet?: Prisma.LeadSheetUncheckedCreateNestedOneWithoutConversationInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
+  turn_metrics?: Prisma.TurnMetricUncheckedCreateNestedManyWithoutConversationInput
+  audit_logs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutConversationInput
+  tool_executions?: Prisma.ToolExecutionUncheckedCreateNestedManyWithoutConversationInput
+  booked_slots?: Prisma.ScheduleSlotUncheckedCreateNestedManyWithoutBooked_conversationInput
+}
+
+export type ConversationCreateOrConnectWithoutTurn_stepsInput = {
+  where: Prisma.ConversationWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConversationCreateWithoutTurn_stepsInput, Prisma.ConversationUncheckedCreateWithoutTurn_stepsInput>
+}
+
+export type ConversationUpsertWithoutTurn_stepsInput = {
+  update: Prisma.XOR<Prisma.ConversationUpdateWithoutTurn_stepsInput, Prisma.ConversationUncheckedUpdateWithoutTurn_stepsInput>
+  create: Prisma.XOR<Prisma.ConversationCreateWithoutTurn_stepsInput, Prisma.ConversationUncheckedCreateWithoutTurn_stepsInput>
+  where?: Prisma.ConversationWhereInput
+}
+
+export type ConversationUpdateToOneWithWhereWithoutTurn_stepsInput = {
+  where?: Prisma.ConversationWhereInput
+  data: Prisma.XOR<Prisma.ConversationUpdateWithoutTurn_stepsInput, Prisma.ConversationUncheckedUpdateWithoutTurn_stepsInput>
+}
+
+export type ConversationUpdateWithoutTurn_stepsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.EnumEstadoConversaFieldUpdateOperationsInput | $Enums.EstadoConversa
+  estagio_atual?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  motivo_transferencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutConversasNestedInput
+  lead_sheet?: Prisma.LeadSheetUpdateOneWithoutConversationNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
+  turn_metrics?: Prisma.TurnMetricUpdateManyWithoutConversationNestedInput
+  audit_logs?: Prisma.AuditLogUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUpdateManyWithoutConversationNestedInput
+  booked_slots?: Prisma.ScheduleSlotUpdateManyWithoutBooked_conversationNestedInput
+}
+
+export type ConversationUncheckedUpdateWithoutTurn_stepsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.EnumEstadoConversaFieldUpdateOperationsInput | $Enums.EstadoConversa
+  estagio_atual?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  motivo_transferencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lead_sheet?: Prisma.LeadSheetUncheckedUpdateOneWithoutConversationNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
+  turn_metrics?: Prisma.TurnMetricUncheckedUpdateManyWithoutConversationNestedInput
+  audit_logs?: Prisma.AuditLogUncheckedUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUncheckedUpdateManyWithoutConversationNestedInput
+  booked_slots?: Prisma.ScheduleSlotUncheckedUpdateManyWithoutBooked_conversationNestedInput
+}
+
+export type ConversationCreateWithoutTool_executionsInput = {
+  id?: string
+  telefone: string
+  estado?: $Enums.EstadoConversa
+  estagio_atual?: string
+  tags?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  motivo_transferencia?: string | null
+  version?: number
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutConversasInput
+  lead_sheet?: Prisma.LeadSheetCreateNestedOneWithoutConversationInput
+  messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
+  turn_metrics?: Prisma.TurnMetricCreateNestedManyWithoutConversationInput
+  audit_logs?: Prisma.AuditLogCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepCreateNestedManyWithoutConversationInput
+  booked_slots?: Prisma.ScheduleSlotCreateNestedManyWithoutBooked_conversationInput
+}
+
+export type ConversationUncheckedCreateWithoutTool_executionsInput = {
+  id?: string
+  tenant_id: string
+  telefone: string
+  estado?: $Enums.EstadoConversa
+  estagio_atual?: string
+  tags?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  motivo_transferencia?: string | null
+  version?: number
+  created_at?: Date | string
+  updated_at?: Date | string
+  lead_sheet?: Prisma.LeadSheetUncheckedCreateNestedOneWithoutConversationInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
+  turn_metrics?: Prisma.TurnMetricUncheckedCreateNestedManyWithoutConversationInput
+  audit_logs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutConversationInput
+  turn_steps?: Prisma.TurnStepUncheckedCreateNestedManyWithoutConversationInput
+  booked_slots?: Prisma.ScheduleSlotUncheckedCreateNestedManyWithoutBooked_conversationInput
+}
+
+export type ConversationCreateOrConnectWithoutTool_executionsInput = {
+  where: Prisma.ConversationWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConversationCreateWithoutTool_executionsInput, Prisma.ConversationUncheckedCreateWithoutTool_executionsInput>
+}
+
+export type ConversationUpsertWithoutTool_executionsInput = {
+  update: Prisma.XOR<Prisma.ConversationUpdateWithoutTool_executionsInput, Prisma.ConversationUncheckedUpdateWithoutTool_executionsInput>
+  create: Prisma.XOR<Prisma.ConversationCreateWithoutTool_executionsInput, Prisma.ConversationUncheckedCreateWithoutTool_executionsInput>
+  where?: Prisma.ConversationWhereInput
+}
+
+export type ConversationUpdateToOneWithWhereWithoutTool_executionsInput = {
+  where?: Prisma.ConversationWhereInput
+  data: Prisma.XOR<Prisma.ConversationUpdateWithoutTool_executionsInput, Prisma.ConversationUncheckedUpdateWithoutTool_executionsInput>
+}
+
+export type ConversationUpdateWithoutTool_executionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.EnumEstadoConversaFieldUpdateOperationsInput | $Enums.EstadoConversa
+  estagio_atual?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  motivo_transferencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutConversasNestedInput
+  lead_sheet?: Prisma.LeadSheetUpdateOneWithoutConversationNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
+  turn_metrics?: Prisma.TurnMetricUpdateManyWithoutConversationNestedInput
+  audit_logs?: Prisma.AuditLogUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUpdateManyWithoutConversationNestedInput
+  booked_slots?: Prisma.ScheduleSlotUpdateManyWithoutBooked_conversationNestedInput
+}
+
+export type ConversationUncheckedUpdateWithoutTool_executionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.EnumEstadoConversaFieldUpdateOperationsInput | $Enums.EstadoConversa
+  estagio_atual?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  motivo_transferencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lead_sheet?: Prisma.LeadSheetUncheckedUpdateOneWithoutConversationNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
+  turn_metrics?: Prisma.TurnMetricUncheckedUpdateManyWithoutConversationNestedInput
+  audit_logs?: Prisma.AuditLogUncheckedUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUncheckedUpdateManyWithoutConversationNestedInput
   booked_slots?: Prisma.ScheduleSlotUncheckedUpdateManyWithoutBooked_conversationNestedInput
 }
 
@@ -1176,6 +1446,8 @@ export type ConversationUpdateWithoutTenantInput = {
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   turn_metrics?: Prisma.TurnMetricUpdateManyWithoutConversationNestedInput
   audit_logs?: Prisma.AuditLogUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUpdateManyWithoutConversationNestedInput
   booked_slots?: Prisma.ScheduleSlotUpdateManyWithoutBooked_conversationNestedInput
 }
 
@@ -1193,6 +1465,8 @@ export type ConversationUncheckedUpdateWithoutTenantInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   turn_metrics?: Prisma.TurnMetricUncheckedUpdateManyWithoutConversationNestedInput
   audit_logs?: Prisma.AuditLogUncheckedUpdateManyWithoutConversationNestedInput
+  turn_steps?: Prisma.TurnStepUncheckedUpdateManyWithoutConversationNestedInput
+  tool_executions?: Prisma.ToolExecutionUncheckedUpdateManyWithoutConversationNestedInput
   booked_slots?: Prisma.ScheduleSlotUncheckedUpdateManyWithoutBooked_conversationNestedInput
 }
 
@@ -1217,6 +1491,8 @@ export type ConversationCountOutputType = {
   messages: number
   turn_metrics: number
   audit_logs: number
+  turn_steps: number
+  tool_executions: number
   booked_slots: number
 }
 
@@ -1224,6 +1500,8 @@ export type ConversationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   messages?: boolean | ConversationCountOutputTypeCountMessagesArgs
   turn_metrics?: boolean | ConversationCountOutputTypeCountTurn_metricsArgs
   audit_logs?: boolean | ConversationCountOutputTypeCountAudit_logsArgs
+  turn_steps?: boolean | ConversationCountOutputTypeCountTurn_stepsArgs
+  tool_executions?: boolean | ConversationCountOutputTypeCountTool_executionsArgs
   booked_slots?: boolean | ConversationCountOutputTypeCountBooked_slotsArgs
 }
 
@@ -1261,6 +1539,20 @@ export type ConversationCountOutputTypeCountAudit_logsArgs<ExtArgs extends runti
 /**
  * ConversationCountOutputType without action
  */
+export type ConversationCountOutputTypeCountTurn_stepsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TurnStepWhereInput
+}
+
+/**
+ * ConversationCountOutputType without action
+ */
+export type ConversationCountOutputTypeCountTool_executionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ToolExecutionWhereInput
+}
+
+/**
+ * ConversationCountOutputType without action
+ */
 export type ConversationCountOutputTypeCountBooked_slotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ScheduleSlotWhereInput
 }
@@ -1282,6 +1574,8 @@ export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   messages?: boolean | Prisma.Conversation$messagesArgs<ExtArgs>
   turn_metrics?: boolean | Prisma.Conversation$turn_metricsArgs<ExtArgs>
   audit_logs?: boolean | Prisma.Conversation$audit_logsArgs<ExtArgs>
+  turn_steps?: boolean | Prisma.Conversation$turn_stepsArgs<ExtArgs>
+  tool_executions?: boolean | Prisma.Conversation$tool_executionsArgs<ExtArgs>
   booked_slots?: boolean | Prisma.Conversation$booked_slotsArgs<ExtArgs>
   _count?: boolean | Prisma.ConversationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["conversation"]>
@@ -1334,6 +1628,8 @@ export type ConversationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   messages?: boolean | Prisma.Conversation$messagesArgs<ExtArgs>
   turn_metrics?: boolean | Prisma.Conversation$turn_metricsArgs<ExtArgs>
   audit_logs?: boolean | Prisma.Conversation$audit_logsArgs<ExtArgs>
+  turn_steps?: boolean | Prisma.Conversation$turn_stepsArgs<ExtArgs>
+  tool_executions?: boolean | Prisma.Conversation$tool_executionsArgs<ExtArgs>
   booked_slots?: boolean | Prisma.Conversation$booked_slotsArgs<ExtArgs>
   _count?: boolean | Prisma.ConversationCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1352,6 +1648,8 @@ export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     messages: Prisma.$MessagePayload<ExtArgs>[]
     turn_metrics: Prisma.$TurnMetricPayload<ExtArgs>[]
     audit_logs: Prisma.$AuditLogPayload<ExtArgs>[]
+    turn_steps: Prisma.$TurnStepPayload<ExtArgs>[]
+    tool_executions: Prisma.$ToolExecutionPayload<ExtArgs>[]
     booked_slots: Prisma.$ScheduleSlotPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1764,6 +2062,8 @@ export interface Prisma__ConversationClient<T, Null = never, ExtArgs extends run
   messages<T extends Prisma.Conversation$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   turn_metrics<T extends Prisma.Conversation$turn_metricsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$turn_metricsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TurnMetricPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   audit_logs<T extends Prisma.Conversation$audit_logsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$audit_logsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  turn_steps<T extends Prisma.Conversation$turn_stepsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$turn_stepsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TurnStepPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tool_executions<T extends Prisma.Conversation$tool_executionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$tool_executionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ToolExecutionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   booked_slots<T extends Prisma.Conversation$booked_slotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$booked_slotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScheduleSlotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2293,6 +2593,54 @@ export type Conversation$audit_logsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+}
+
+/**
+ * Conversation.turn_steps
+ */
+export type Conversation$turn_stepsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TurnStep
+   */
+  select?: Prisma.TurnStepSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TurnStep
+   */
+  omit?: Prisma.TurnStepOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TurnStepInclude<ExtArgs> | null
+  where?: Prisma.TurnStepWhereInput
+  orderBy?: Prisma.TurnStepOrderByWithRelationInput | Prisma.TurnStepOrderByWithRelationInput[]
+  cursor?: Prisma.TurnStepWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TurnStepScalarFieldEnum | Prisma.TurnStepScalarFieldEnum[]
+}
+
+/**
+ * Conversation.tool_executions
+ */
+export type Conversation$tool_executionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ToolExecution
+   */
+  select?: Prisma.ToolExecutionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ToolExecution
+   */
+  omit?: Prisma.ToolExecutionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ToolExecutionInclude<ExtArgs> | null
+  where?: Prisma.ToolExecutionWhereInput
+  orderBy?: Prisma.ToolExecutionOrderByWithRelationInput | Prisma.ToolExecutionOrderByWithRelationInput[]
+  cursor?: Prisma.ToolExecutionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ToolExecutionScalarFieldEnum | Prisma.ToolExecutionScalarFieldEnum[]
 }
 
 /**

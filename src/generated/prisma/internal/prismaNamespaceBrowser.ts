@@ -57,7 +57,9 @@ export const ModelName = {
   Message: 'Message',
   ScheduleSlot: 'ScheduleSlot',
   AuditLog: 'AuditLog',
-  TurnMetric: 'TurnMetric'
+  TurnMetric: 'TurnMetric',
+  TurnStep: 'TurnStep',
+  ToolExecution: 'ToolExecution'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -191,6 +193,42 @@ export const TurnMetricScalarFieldEnum = {
 } as const
 
 export type TurnMetricScalarFieldEnum = (typeof TurnMetricScalarFieldEnum)[keyof typeof TurnMetricScalarFieldEnum]
+
+
+export const TurnStepScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  conversation_id: 'conversation_id',
+  turn_id: 'turn_id',
+  step_index: 'step_index',
+  provider: 'provider',
+  model: 'model',
+  content: 'content',
+  tool_calls: 'tool_calls',
+  prompt_tokens: 'prompt_tokens',
+  completion_tokens: 'completion_tokens',
+  estimated_cost_usd: 'estimated_cost_usd',
+  created_at: 'created_at'
+} as const
+
+export type TurnStepScalarFieldEnum = (typeof TurnStepScalarFieldEnum)[keyof typeof TurnStepScalarFieldEnum]
+
+
+export const ToolExecutionScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  conversation_id: 'conversation_id',
+  turn_id: 'turn_id',
+  step_index: 'step_index',
+  call_index: 'call_index',
+  tool_name: 'tool_name',
+  arguments: 'arguments',
+  result: 'result',
+  simulacao: 'simulacao',
+  created_at: 'created_at'
+} as const
+
+export type ToolExecutionScalarFieldEnum = (typeof ToolExecutionScalarFieldEnum)[keyof typeof ToolExecutionScalarFieldEnum]
 
 
 export const SortOrder = {

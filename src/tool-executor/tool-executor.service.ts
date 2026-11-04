@@ -1,12 +1,23 @@
 
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
+import { isDeepStrictEqual } from 'node:util';
+import { Prisma } from '../generated/prisma/client.js';
 import { CrmService } from '../crm/crm.service.js';
 import { CrmActionsService } from '../crm-actions/crm-actions.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 interface ToolContext {
   tenantId: string;
   conversaId: string;
   expectedVersion: number;
+  turnId: string;
+  stepIndex: number;
+  callIndex: number;
   simulacao?: boolean;
 }
 
@@ -24,9 +35,10 @@ export class ToolExecutorService {
   constructor(
     private readonly crmService: CrmService,
     private readonly crmActionsService: CrmActionsService,
+    private readonly prisma: PrismaService,
   ) {}
 
-  async executar(
+    async executar(
     nomeFerramenta: string,
     argumentos: unknown,
     contexto: ToolContext,
@@ -35,14 +47,142 @@ export class ToolExecutorService {
 
     const args = this.validarObjeto(argumentos);
 
+    const chave = {
+      tenant_id_turn_id_step_index_call_index: {
+        tenant_id: contexto.tenantId,
+        turn_id: contexto.turnId,
+        step_index: contexto.stepIndex,
+        call_index: contexto.callIndex,
+      },
+    };
+
+    // 1. Consulta antes de validar novamente o estado da conversa.
+    const existente = await this.prisma.toolExecution.findUnique({
+      where: chave,
+    });
+
+    if (existente) {
+      return this.reproduzirResultado(
+        existente,
+        nomeFerramenta,
+        args,
+        contexto,
+      );
+    }
+
+    try {
+      // 2. Executa e persiste tudo na mesma transação.
+      const resultado = await this.prisma.$transaction(async (tx) => {
+        // Reconsulta dentro da transação para cobrir execuções concorrentes.
+        const registro = await tx.toolExecution.findUnique({
+          where: chave,
+        });
+
+        if (registro) {
+          return this.reproduzirResultado(
+            registro,
+            nomeFerramenta,
+            args,
+            contexto,
+          );
+        }
+
+        let resultadoFerramenta: {
+          sucesso: boolean;
+          dados: unknown;
+        };
+
+        try {
+          resultadoFerramenta = await this.executarFerramenta(
+            nomeFerramenta,
+            args,
+            contexto,
+            tx,
+          );
+        } catch (error) {
+          // Somente rejeições de política são resultados definitivos.
+          if (!(error instanceof ForbiddenException)) {
+            throw error;
+          }
+
+          const resultadoErro = {
+            __toolExecutionError: true,
+            status: 403,
+            message: error.message,
+          };
+
+          await tx.toolExecution.create({
+            data: {
+              tenant_id: contexto.tenantId,
+              conversation_id: contexto.conversaId,
+              turn_id: contexto.turnId,
+              step_index: contexto.stepIndex,
+              call_index: contexto.callIndex,
+              tool_name: nomeFerramenta,
+              arguments: args as Prisma.InputJsonValue,
+              result: resultadoErro,
+              simulacao: contexto.simulacao ?? false,
+            },
+          });
+
+          return resultadoErro;
+        }
+
+        await tx.toolExecution.create({
+          data: {
+            tenant_id: contexto.tenantId,
+            conversation_id: contexto.conversaId,
+            turn_id: contexto.turnId,
+            step_index: contexto.stepIndex,
+            call_index: contexto.callIndex,
+            tool_name: nomeFerramenta,
+            arguments: args as Prisma.InputJsonValue,
+            result: resultadoFerramenta as Prisma.InputJsonValue,
+            simulacao: contexto.simulacao ?? false,
+          },
+        });
+
+        return resultadoFerramenta;
+      });
+
+      return this.reproduzirErroSeNecessario(resultado);
+    } catch (error) {
+      // 3. Outra execução pode ter vencido a disputa pela chave única.
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
+        const vencedor = await this.prisma.toolExecution.findUnique({
+          where: chave,
+        });
+
+        if (vencedor) {
+          return this.reproduzirResultado(
+            vencedor,
+            nomeFerramenta,
+            args,
+            contexto,
+          );
+        }
+      }
+
+      throw error;
+    }
+  }
+
+  private async executarFerramenta(
+    nomeFerramenta: string,
+    args: Record<string, unknown>,
+    contexto: ToolContext,
+    tx: Prisma.TransactionClient,
+  ) {
     switch (nomeFerramenta) {
       case 'atualizar_ficha':
         return {
           sucesso: true,
-          dados: await this.atualizarFicha(
-            args,
-            contexto,
-          ),
+          dados: await this.atualizarFicha(args, contexto, tx),
         };
 
       case 'adicionar_tag':
@@ -64,6 +204,7 @@ export class ToolExecutorService {
             args.tag as 'qualificado' | 'desqualificado' | 'cliente-antigo',
             contexto.expectedVersion,
             contexto.simulacao ?? false,
+            tx,
           ),
         };
 
@@ -79,6 +220,7 @@ export class ToolExecutorService {
             args.estagio as string,
             contexto.expectedVersion,
             contexto.simulacao ?? false,
+            tx,
           ),
         };
 
@@ -89,6 +231,7 @@ export class ToolExecutorService {
           sucesso: true,
           dados: await this.crmActionsService.consultarAgenda(
             contexto.tenantId,
+            tx,
           ),
         };
 
@@ -103,6 +246,8 @@ export class ToolExecutorService {
             contexto.conversaId,
             args.codigo_horario as string,
             contexto.expectedVersion,
+            contexto.simulacao ?? false,
+            tx,
           ),
         };
 
@@ -118,6 +263,7 @@ export class ToolExecutorService {
             args.resumo as string,
             contexto.expectedVersion,
             contexto.simulacao ?? false,
+            tx,
           ),
         };
 
@@ -141,6 +287,8 @@ export class ToolExecutorService {
             contexto.conversaId,
             args.motivo as string,
             contexto.expectedVersion,
+            contexto.simulacao ?? false,
+            tx,
           ),
         };
 
@@ -151,9 +299,55 @@ export class ToolExecutorService {
     }
   }
 
+  private reproduzirResultado(
+    registro: {
+      conversation_id: string;
+      tool_name: string;
+      arguments: Prisma.JsonValue;
+      simulacao: boolean;
+      result: Prisma.JsonValue;
+    },
+    nomeFerramenta: string,
+    args: Record<string, unknown>,
+    contexto: ToolContext,
+  ) {
+    if (
+      registro.conversation_id !== contexto.conversaId ||
+      registro.tool_name !== nomeFerramenta ||
+      !isDeepStrictEqual(registro.arguments, args) ||
+      registro.simulacao !== (contexto.simulacao ?? false)
+    ) {
+      throw new ConflictException(
+        'A chave de idempotência já foi utilizada com dados diferentes.',
+      );
+    }
+
+    return this.reproduzirErroSeNecessario(registro.result);
+  }
+
+  private reproduzirErroSeNecessario(resultado: unknown) {
+    if (
+      typeof resultado === 'object' &&
+      resultado !== null &&
+      !Array.isArray(resultado) &&
+      '__toolExecutionError' in resultado &&
+      resultado.__toolExecutionError === true
+    ) {
+      const mensagem =
+        'message' in resultado && typeof resultado.message === 'string'
+          ? resultado.message
+          : 'A ferramenta foi rejeitada por uma regra de negócio.';
+
+      throw new ForbiddenException(mensagem);
+    }
+
+    return resultado;
+  }
+
   private async atualizarFicha(
     args: Record<string, unknown>,
     contexto: ToolContext,
+    tx: Prisma.TransactionClient,
   ) {
     this.validarChaves(args, ['campo', 'valor']);
 
@@ -224,6 +418,8 @@ export class ToolExecutorService {
       contexto.conversaId,
       dadosExtraidos,
       contexto.expectedVersion,
+      contexto.simulacao ?? false,
+      tx,
     );
   }
 
@@ -246,6 +442,33 @@ export class ToolExecutorService {
     ) {
       throw new BadRequestException(
         'A versão esperada da conversa deve ser um número inteiro não negativo.',
+      );
+    }
+
+    if (
+      typeof contexto.turnId !== 'string' ||
+      !contexto.turnId.trim()
+    ) {
+      throw new BadRequestException(
+        'O identificador do turno é obrigatório.',
+      );
+    }
+
+    if (
+      !Number.isInteger(contexto.stepIndex) ||
+      contexto.stepIndex < 0
+    ) {
+      throw new BadRequestException(
+        'O índice da etapa deve ser um número inteiro não negativo.',
+      );
+    }
+
+    if (
+      !Number.isInteger(contexto.callIndex) ||
+      contexto.callIndex < 0
+    ) {
+      throw new BadRequestException(
+        'O índice da chamada deve ser um número inteiro não negativo.',
       );
     }
 
